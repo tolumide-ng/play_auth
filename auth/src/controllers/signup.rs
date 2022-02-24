@@ -11,7 +11,7 @@ struct SignupData {
 
 
 #[post("/create")]
-pub fn create(data: Json<SignupData>) {
+pub fn create() {
     
 }
 
