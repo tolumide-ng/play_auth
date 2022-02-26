@@ -16,7 +16,7 @@ serde = { version = "1.0.133", features = ["derive"] }
 serde-aux = "3.0.1"
 serde_derive = "1.0.133"
 serde_json = "1.0.75"
-
+sqlx = { version="0.5.11", features = ["chrono", "tls", "offline", "json", "migrate", "uuid", "postgres", "runtime-tokio-native-tls"] }
 
 [dependencies.rocket]
 version = "0.5.0-rc.1"
