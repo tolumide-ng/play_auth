@@ -1,0 +1,23 @@
+name: Cargo Build & Test
+
+on:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_and_test:
+   name: Auth latest
+   runs-on: ubuntu-latest
+   strategy:
+    matrix:
+     toolchains:
+      - stable
+      - beta
+      - nightly
+   steps:
+     - uses: actions/checkout@v2
+     - uses: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+     - uses: cargo build --verbose
+     - uses: cargo test --verbose

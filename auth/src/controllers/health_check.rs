@@ -1,5 +1,5 @@
 
 #[get("/")]
 pub fn health() -> &'static str {
-    "Hello World"
+    "Hello World from tolumide"
 }

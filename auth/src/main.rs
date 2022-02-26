@@ -1,9 +1,9 @@
 #[macro_use] extern crate rocket;
 
-use auth::controllers::health_check::health;
+use auth::{routes::routes};
 
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![health])
+    routes()
 }
