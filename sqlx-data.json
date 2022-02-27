@@ -1,3 +1,53 @@
 {
-  "db": "PostgreSQL"
+  "db": "PostgreSQL",
+  "6924bd114afd77d97e50909caf9d9f7b5262275208b3fabf666f81b1b497ca01": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "hash",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verified",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT * FROM play_user WHERE user_id=$1"
+  }
 }

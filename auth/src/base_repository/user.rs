@@ -1,5 +1,5 @@
 use sqlx::{Pool, Postgres};
-use anyhow::Result;
+// use anyhow::Result;
 
 
 #[derive(Debug)]
@@ -10,11 +10,13 @@ pub struct User {
 }
 
 impl User {
-    pub async fn find_by_id(id: u32, pool: &Pool<Postgres>) -> Result<User> {
-        let user = sqlx::query_as!(User, r#"SELECT * FROM user WHERE user_id=$1"#)
+    pub async fn find_by_id(id: uuid::Uuid, pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+        let user = sqlx::query!(r#"SELECT * FROM play_user WHERE user_id=$1"#, id)
             .fetch_one(&*pool)
             .await?;
 
-        Ok(user)
+        Ok(())
+
+        // Ok(user)
     }
 }
