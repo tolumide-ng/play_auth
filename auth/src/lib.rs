@@ -2,3 +2,4 @@
 
 pub mod controllers;
 pub mod routes;
+pub mod base_repository;
