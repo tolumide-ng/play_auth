@@ -3,3 +3,6 @@
 pub mod controllers;
 pub mod routes;
 pub mod base_repository;
+pub mod errors;
+pub mod helpers;
+pub mod settings;
