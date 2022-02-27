@@ -17,7 +17,7 @@ pub enum AppEnv {
 }
 
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct EnvVars {
     pub db_host: String,
     pub db_port: String,
@@ -30,7 +30,7 @@ pub struct EnvVars {
 impl EnvVars {
     pub fn verify() -> Result<(), String> {
         dotenv().ok();
-        let variables = vec!["APP_ENV", "DB_HOST", "DB_PORT", "DB_USERNAME", "DB_PASSWORD", "DB_NAME"];
+        let variables = vec!["DB_HOST", "DB_PORT", "DB_USERNAME", "DB_PASSWORD", "DB_NAME"];
 
         for var in variables {
             if env::var(var).is_err() {
