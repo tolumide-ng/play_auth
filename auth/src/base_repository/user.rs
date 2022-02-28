@@ -20,5 +20,9 @@ impl User {
     //     Ok(user)
     // }
 
-    pub async fn create_user(email: String, ) {}
+    pub async fn email_exist(email: String, pool: Pool<Postgres>) {
+        let user = sqlx::query!(r#"SELECT email FROM play_user WHERE email = $1"#, email)
+            .fetch_optional(&pool)
+            .await.unwrap();
+    }
 }

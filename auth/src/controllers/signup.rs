@@ -3,15 +3,15 @@ use serde::{Deserialize};
 
 
 #[derive(Deserialize)]
-struct SignupData {
-    email: &'static str,
-    username: &'static str,
-    password: &'static str,
+pub struct User {
+    email: String,
+    username: String,
+    password: String,
 }
 
 
-#[post("/create")]
-pub fn create() {
-    
+#[post("/create", data = "<user>")]
+pub async fn create(user: Json<User>) {
+    // let user = User::email_exist();
 }
 
