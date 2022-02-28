@@ -1,4 +1,4 @@
-use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use sqlx::{postgres::{PgConnectOptions, PgSslMode}};
 
 use super::variables::{EnvVars, AppEnv};
 

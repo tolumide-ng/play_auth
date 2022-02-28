@@ -4,6 +4,6 @@ use auth::{routes::routes};
 
 
 #[launch]
-fn rocket() -> _ {
-    routes()
+async fn rocket() -> _ {
+    routes().await
 }

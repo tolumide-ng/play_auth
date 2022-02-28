@@ -1,2 +1,5 @@
-pub mod signup;
-pub mod health_check;
+mod signup;
+mod health_check;
+
+pub use signup::create;
+pub use health_check::health;
