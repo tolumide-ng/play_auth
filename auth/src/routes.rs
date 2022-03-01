@@ -15,6 +15,7 @@ pub async fn routes () -> Rocket<Build>{
     rocket::build()
         .attach(EnvVars::default())
         .manage(db_pool)
+        .manage(EnvVars::new())
         .mount("/", routes![
             health, 
             create

@@ -26,6 +26,9 @@ pub struct EnvVars {
     pub db_name: String,
     pub app_env: String,
     pub db_url: String,
+    pub m_cost: u32,
+    pub p_cost: u32,
+    pub t_cost: u32,
 }
 
 
@@ -33,7 +36,8 @@ impl EnvVars {
     pub fn verify() -> Result<(), String> {
         dotenv().ok();
         let variables = vec!["APP_ENV", "DB_HOST", "DB_PORT", 
-            "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "DB_URL",
+            "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "DB_URL", "M_COST", "T_COST",
+            "P_COST"
         ];
 
         for var in variables {
@@ -63,6 +67,9 @@ impl EnvVars {
             db_password: Self::get_var("DB_PASSWORD"),
             db_name: Self::get_var("DB_NAME"),
             db_url: Self::get_var("DB_URL"),
+            t_cost: Self::get_var("T_COST").parse::<u32>().unwrap(),
+            m_cost: Self::get_var("M_COST").parse::<u32>().unwrap(),
+            p_cost: Self::get_var("P_COST").parse::<u32>().unwrap(),
         }
     }
 

@@ -1,6 +1,6 @@
 use sqlx::{Pool, Postgres};
 
-use crate::helpers::TResult;
+use crate::{settings::variables::EnvVars};
 // use anyhow::Result;
 
 
@@ -20,7 +20,7 @@ impl DbUser {
     //     Ok(user)
     // }
 
-    pub async fn email_exist(email: String, pool: &Pool<Postgres>) -> bool {
+    pub async fn email_exist(email: String, pool: &Pool<Postgres>, env: &EnvVars) -> bool {
         // handle db connectioin errors with an interceptor
         let user = sqlx::query!(r#"SELECT email FROM play_user WHERE email = $1"#, email)
             .fetch_optional(pool)

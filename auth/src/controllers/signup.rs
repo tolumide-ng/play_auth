@@ -2,7 +2,7 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize};
 use sqlx::{Postgres, Pool};
 
-use crate::base_repository::user::DbUser;
+use crate::{base_repository::user::DbUser, settings::variables::EnvVars};
 
 
 #[derive(Deserialize)]
@@ -14,8 +14,8 @@ pub struct User {
 
 
 #[post("/create", data = "<user>")]
-pub async fn create(user: Json<User>, pool: &State<Pool<Postgres>>) -> &'static str {
-    let user = DbUser::email_exist(user.email.clone(), pool).await;
+pub async fn create(user: Json<User>, pool: &State<Pool<Postgres>>, env: &State<EnvVars>) -> &'static str {
+    let user = DbUser::email_exist(user.email.clone(), pool, env).await;
     
     "Hello World from tolumide"
 }
