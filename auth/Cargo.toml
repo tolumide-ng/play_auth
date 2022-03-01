@@ -22,6 +22,9 @@ anyhow = { version = "1.0", default-features = false }
 thiserror = "1.0.30"
 dotenv = "0.15.0"
 derive_more = "0.99.17"
+argon2 = { version = "0.3.4", features = ["std"] }
+rand_core = { version = "0.6", features = ["std"] }
+
 
 [dependencies.rocket]
 version = "0.5.0-rc.1"
