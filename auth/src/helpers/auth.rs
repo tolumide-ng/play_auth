@@ -1,18 +1,18 @@
-use std::borrow::Cow;
-
 use argon2::{
     password_hash::{
-        rand_core::OsRng, PasswordHash, 
-        PasswordHasher, SaltString
+        rand_core::OsRng, 
+        PasswordHasher, SaltString, PasswordHashString
     },
     Argon2
 };
-
 use argon2::{Algorithm::Argon2id, Version::V0x13, Params};
+use lazy_static::lazy_static;
+use fancy_regex::Regex;
 
 use crate::settings::variables::EnvVars;
 
-struct Password(String);
+
+pub struct Password(PasswordHashString);
 
 impl Password {
     pub fn new(pwd: String, env: EnvVars) -> Option<Self> {
@@ -28,16 +28,20 @@ impl Password {
             let pwd_bytes = pwd.as_bytes().clone();
             let pwd_hash = argon2.hash_password(pwd_bytes, &salt).unwrap().to_string();
 
-            return Some(Self(pwd_hash))
+            return Some(Self(PasswordHashString::new(&pwd_hash).unwrap()))
         }
 
         None
 
     }
 
-    fn is_valid(pwd: &String) -> bool {
+    fn is_valid(pwd: &str) -> bool {
         // password must be atleast 8 characters with letters, numbers, and special char
-        // todo() - learn regex in rust
-        true
+        lazy_static! {
+             static ref RE: Regex = Regex::new(r"^(?=.*[^a-zA-Z])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]\S.{8,})").unwrap();
+        }
+
+        RE.is_match(pwd).unwrap()
     }
 }
+
