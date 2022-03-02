@@ -31,3 +31,8 @@ fancy-regex = "0.8.0"
 [dependencies.rocket]
 version = "0.5.0-rc.1"
 features = ["json"]
+
+
+[dev-dependencies]
+fake = "2.4"
+rand = "0.8"

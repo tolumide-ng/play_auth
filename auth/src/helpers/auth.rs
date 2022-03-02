@@ -15,13 +15,12 @@ use crate::settings::variables::EnvVars;
 pub struct Password(PasswordHashString);
 
 impl Password {
-    pub fn new(pwd: String, env: EnvVars) -> Option<Self> {
+    pub fn new(pwd: String) -> Option<Self> {
 
-        let EnvVars { m_cost, p_cost, t_cost, .. } = env;
+        let EnvVars { m_cost, p_cost, t_cost, .. } = EnvVars::new();
 
         if Password::is_valid(&pwd) {
             let salt = SaltString::generate(&mut OsRng);
-            // let argon2 = Argon2::default();
             // tood()! should be secrets
             let params = Params::new(m_cost, t_cost, p_cost, None).unwrap();
             let argon2 = Argon2::new(Argon2id, V0x13, params);
@@ -38,10 +37,52 @@ impl Password {
     fn is_valid(pwd: &str) -> bool {
         // password must be atleast 8 characters with letters, numbers, and special char
         lazy_static! {
-             static ref RE: Regex = Regex::new(r"^(?=.*[^a-zA-Z])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]\S.{8,})").unwrap();
+             static ref RE: Regex = Regex::new(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*#?&^_-]).{8,}").unwrap();
         }
 
         RE.is_match(pwd).unwrap()
     }
 }
 
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn alphabets_only_password_is_invalid() {
+        let pwd = "password".to_string();
+        assert!(Password::new(pwd).is_none());
+    }
+
+    #[test]
+    fn numbers_only_password_is_invalid() {
+        let pwd = "12345".to_string();
+        assert!(Password::new(pwd).is_none());
+    }
+
+    #[test]
+    fn alphabets_and_numbers_only_is_invalid() {
+        let pwd = "1234password".to_string();
+        assert!(Password::new(pwd).is_none());
+    }
+
+    #[test]
+    fn password_with_short_length_is_invalid() {
+        let pwd = "ATyp23*".to_string();
+        assert!(Password::new(pwd).is_none());
+    }
+
+    #[test]
+    fn password_with_special_characters_only_is_invalid() {
+        let pwd = "********#######".to_string();
+        assert!(Password::new(pwd).is_none());
+    }
+
+    #[test]
+    fn valid_password() {
+        let pwd = "Authentication1234*".to_string();
+        assert!(Password::new(pwd).is_some());
+    }
+}
