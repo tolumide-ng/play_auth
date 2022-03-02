@@ -37,7 +37,7 @@ impl Password {
     fn is_valid(pwd: &str) -> bool {
         // password must be atleast 8 characters with letters, numbers, and special char
         lazy_static! {
-             static ref RE: Regex = Regex::new(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*#?&^_-]).{8,}").unwrap();
+             static ref RE: Regex = Regex::new(r#"^(?=.*[a-z])(?=.*[A-Z])(?=.*[~@#$%^&*+=`|{}:;!.?\(")\[\]-]).{8,}"#).unwrap();
         }
 
         RE.is_match(pwd).unwrap()
@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn valid_password() {
-        let pwd = "Authentication1234*".to_string();
+        let pwd = "Authentication1234\"".to_string();
         assert!(Password::new(pwd).is_some());
     }
 }
