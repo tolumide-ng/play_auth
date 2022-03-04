@@ -1,5 +1,6 @@
 use dotenv::dotenv;
 use rocket::{fairing::{self, Fairing, Info, Kind}, Rocket, Build};
+use secrecy::Secret;
 use serde::Deserialize;
 use std::env;
 
@@ -17,7 +18,7 @@ pub enum AppEnv {
 }
 
 
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct EnvVars {
     pub db_host: String,
     pub db_port: u16,
@@ -29,6 +30,9 @@ pub struct EnvVars {
     pub m_cost: u32,
     pub p_cost: u32,
     pub t_cost: u32,
+    pub smtp_user: String,
+    pub smtp_pass: String,
+    pub smtp_server: String,
 }
 
 
@@ -37,7 +41,7 @@ impl EnvVars {
         dotenv().ok();
         let variables = vec!["APP_ENV", "DB_HOST", "DB_PORT", 
             "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "DB_URL", "M_COST", "T_COST",
-            "P_COST"
+            "P_COST", "SMTP_USER", "SMTP_PASS", "SMTP_SERVER"
         ];
 
         for var in variables {
@@ -70,6 +74,9 @@ impl EnvVars {
             t_cost: Self::get_var("T_COST").parse::<u32>().unwrap(),
             m_cost: Self::get_var("M_COST").parse::<u32>().unwrap(),
             p_cost: Self::get_var("P_COST").parse::<u32>().unwrap(),
+            smtp_user: Self::get_var("DB_NAME"),
+            smtp_pass: Self::get_var("DB_NAME"),
+            smtp_server: Self::get_var("SMTP_SERVER"),
         }
     }
 

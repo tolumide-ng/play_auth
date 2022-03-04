@@ -13,7 +13,7 @@ pub async fn routes () -> Rocket<Build>{
 
     
     rocket::build()
-        .attach(EnvVars::default())
+        .attach(EnvVars::new())
         .manage(db_pool)
         .manage(EnvVars::new())
         .mount("/", routes![
