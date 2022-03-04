@@ -74,8 +74,8 @@ impl EnvVars {
             t_cost: Self::get_var("T_COST").parse::<u32>().unwrap(),
             m_cost: Self::get_var("M_COST").parse::<u32>().unwrap(),
             p_cost: Self::get_var("P_COST").parse::<u32>().unwrap(),
-            smtp_user: Self::get_var("DB_NAME"),
-            smtp_pass: Self::get_var("DB_NAME"),
+            smtp_user: Self::get_var("SMTP_USER"),
+            smtp_pass: Self::get_var("SMTP_PASS"),
             smtp_server: Self::get_var("SMTP_SERVER"),
         }
     }

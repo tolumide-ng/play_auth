@@ -31,11 +31,12 @@ impl Email {
     }
 
     pub fn send_email(self) {
+        // maybe just use Postfix
         let EnvVars { smtp_user, smtp_pass, smtp_server, .. } = EnvVars::new();
         let email = Message::builder()
-            .from("Dire <noreply@first.com>".parse().unwrap())
+            .from("Dire <noreply@gmail.com>".parse().unwrap())
             .to(format!("{} <{}>", self.recipient_name, self.recipient_email).parse().unwrap())
-            .subject("Welcome to DireFirst")
+            .subject("Welcome to the app with no name yet!")
             // use html file styled with css in this case
             .body(String::from(r#"Thank you for signing up with us :wink, please 
             activate your account by clicking the link: <>whatever the links<>"#)).unwrap();
