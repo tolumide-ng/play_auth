@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  backend:
+     build:
+         dockerfile: Dockerfile
+         context: .
+     depends_on:
+         - redis
+         - db
+     ports:
+       - "8001:8000"
+     networks:
+         - webnet
+     restart: on-failure:2
+    #  command: bash -c "cargo watch -x \"run -p auth\""
+  redis:
+     image: redis
+  db:
+     image: postgres
+     volumes:
+        - pgdata:/var/lib/postgresql/data
+     networks:
+         - webnet
+     restart: on-failure:2
+     environment:
+        POSTGRES_USERNAME: ${DB_USERNAME}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_PORT: ${DB_PORT}
+        POSTGRES_HOST: ${DB_HOST}
+        POSTGRES_NAME: ${DB_NAME}
+networks:
+    webnet:
+volumes:
+    pgdata:

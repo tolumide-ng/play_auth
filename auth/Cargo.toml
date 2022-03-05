@@ -12,4 +12,31 @@ name = "auth"
 path = "src/main.rs"
 
 [dependencies]
-rocket = "0.5.0-rc.1"
+serde = { version = "1.0.133", features = ["derive"] }
+serde-aux = "3.0.1"
+serde_derive = "1.0.133"
+serde_json = "1.0.75"
+sqlx = { version="0.5.11", features = ["chrono", "tls", "offline", "json", "migrate", "uuid", "postgres", "runtime-tokio-native-tls"] }
+uuid = { version="0.8.2", features = ["serde", "v4"] }
+anyhow = "1.0.53"
+thiserror = "1.0.30"
+dotenv = "0.15.0"
+derive_more = "0.99.17"
+argon2 = { version = "0.3.4", features = ["std"] }
+rand_core = { version = "0.6", features = ["std"] }
+lazy_static = "1.4.0"
+fancy-regex = "0.8.0"
+lettre = { version = "0.10.0-rc.4", features = ["rustls-tls"] }
+secrecy = { version = "0.8.0", features = ["serde"] }
+jsonwebtoken = {version = "8", default-features = false }
+rocket_contrib = { version = "0.4.10", default-features = false, features = ["json"] }
+
+
+[dependencies.rocket]
+version = "0.5.0-rc.1"
+features = ["json"]
+
+
+[dev-dependencies]
+fake = "2.4"
+rand = "0.8"

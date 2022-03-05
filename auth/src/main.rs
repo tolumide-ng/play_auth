@@ -1,9 +1,9 @@
 #[macro_use] extern crate rocket;
 
-use auth::controllers::signup::create;
+use auth::{routes::routes};
 
 
 #[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![create])
+async fn rocket() -> _ {
+    routes().await
 }

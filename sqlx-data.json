@@ -1,0 +1,38 @@
+{
+  "db": "PostgreSQL",
+  "0de792010f1a9687adda9094930c598746181f36787cf5ee90616cc3443a2525": {
+    "describe": {
+      "columns": [
+        {
+          "name": "email",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT email FROM play_user WHERE (email = $1) OR (username = $2)"
+  },
+  "831e114c9ed25e6af20bf1c039fbe4485d26add0ac2bd03994ad484c6a500ec3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Varchar",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO play_user (email, username, hash) VALUES ($1, $2, $3)"
+  }
+}
