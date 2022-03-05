@@ -1,6 +1,5 @@
 use dotenv::dotenv;
 use rocket::{fairing::{self, Fairing, Info, Kind}, Rocket, Build};
-use secrecy::Secret;
 use serde::Deserialize;
 use std::env;
 
@@ -33,6 +32,7 @@ pub struct EnvVars {
     pub smtp_user: String,
     pub smtp_pass: String,
     pub smtp_server: String,
+    pub jwt_secret: String,
 }
 
 
@@ -41,7 +41,7 @@ impl EnvVars {
         dotenv().ok();
         let variables = vec!["APP_ENV", "DB_HOST", "DB_PORT", 
             "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "DB_URL", "M_COST", "T_COST",
-            "P_COST", "SMTP_USER", "SMTP_PASS", "SMTP_SERVER"
+            "P_COST", "SMTP_USER", "SMTP_PASS", "SMTP_SERVER", "JWT_SECRET",
         ];
 
         for var in variables {
@@ -57,12 +57,17 @@ impl EnvVars {
         Ok(())
     }
 
-    pub fn new() -> Self {
+    pub fn new_with_verify() -> Self {
         dotenv().ok();
         if let Err(e) = EnvVars::verify() {
             panic!("{}", e)
         }
         
+        EnvVars::new()
+    }
+
+    pub fn new() -> Self {
+        dotenv().ok();
         Self {
             app_env: Self::get_var("APP_ENV"),
             db_host: Self::get_var("DB_HOST"),
@@ -77,6 +82,7 @@ impl EnvVars {
             smtp_user: Self::get_var("SMTP_USER"),
             smtp_pass: Self::get_var("SMTP_PASS"),
             smtp_server: Self::get_var("SMTP_SERVER"),
+            jwt_secret: Self::get_var("JWT_SECRET"),
         }
     }
 

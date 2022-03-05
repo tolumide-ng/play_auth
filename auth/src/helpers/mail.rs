@@ -1,7 +1,3 @@
-use lettre::message::MessageBuilder;
-// send email on signup
-// send email on login
-// send email on password reset
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
 use secrecy::{Secret, ExposeSecret};
