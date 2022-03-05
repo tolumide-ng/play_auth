@@ -12,7 +12,7 @@ use fancy_regex::Regex;
 use crate::settings::variables::EnvVars;
 
 
-pub struct Password(PasswordHashString);
+pub struct Password(String);
 
 impl Password {
     pub fn new(pwd: String) -> Option<Self> {
@@ -27,7 +27,9 @@ impl Password {
             let pwd_bytes = pwd.as_bytes().clone();
             let pwd_hash = argon2.hash_password(pwd_bytes, &salt).unwrap().to_string();
 
-            return Some(Self(PasswordHashString::new(&pwd_hash).unwrap()))
+            // return Some(Self(PasswordHashString::new(&pwd_hash).unwrap()))
+            println!("THIS IS THE PASSWORD HASH {:#?}", pwd_hash);
+            return Some(Self(pwd_hash))
         }
 
         None
@@ -42,6 +44,12 @@ impl Password {
 
         RE.is_match(pwd).unwrap()
     }
+
+    pub fn get_val(self) -> String {
+        self.0
+    }
+
+    pub fn compare() {}
 }
 
 

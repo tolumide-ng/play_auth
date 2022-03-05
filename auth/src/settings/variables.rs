@@ -46,6 +46,7 @@ impl EnvVars {
 
         for var in variables {
             if env::var(var).is_err() {
+
                 let err =  format!("Env variable: {:#?} is required", var);
                 return Err(err)
             }

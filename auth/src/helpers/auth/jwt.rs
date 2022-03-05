@@ -27,6 +27,7 @@ trait Jwt where Self: Serialize + DeserializeOwned {
 // minutes (expiry of the old verification token) - Use redis timed delete (expires and deletes after a particular time)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Signup {
+    // we won't be saving the jwt on redis, only save the signup_id mapped to the user_id on redis
     signup_id: String,
     exp: usize,
     iat: usize,

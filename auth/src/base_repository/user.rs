@@ -1,8 +1,5 @@
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::variables::EnvVars};
-// use anyhow::Result;
-
 
 #[derive(Debug)]
 pub struct DbUser {
@@ -11,25 +8,39 @@ pub struct DbUser {
     pub hash: String,
 }
 
+struct Row {
+    email: String,
+    username: String,
+}
+
 impl DbUser {
-    // pub async fn find_by_id(id: uuid::Uuid, pool: &Pool<Postgres>) -> TResult<sqlx::Error> {
-    //     let user = sqlx::query!(r#"SELECT * FROM play_user WHERE user_id=$1"#, id)
-    //         .fetch_one(&*pool)
-    //         .await?;
-
-    //     Ok(user)
-    // }
-
-    pub async fn email_exist(email: String, pool: &Pool<Postgres>, env: &EnvVars) -> bool {
+    pub async fn email_exist(pool: &Pool<Postgres>, email: String, username: String) -> bool {
         // handle db connectioin errors with an interceptor
+        // let user = sqlx::query!(r#"SELECT * FROM play_user WHERE (email = $1)"#, email)
+        //     .fetch_optional(pool)
+        //     .await.unwrap();
         let user = sqlx::query!(r#"SELECT email FROM play_user WHERE email = $1"#, email)
             .fetch_optional(pool)
             .await.unwrap();
 
-        if user.is_some() {
-            return true;
-        }
+        // let user = sqlx::query!(r#"SELECT email FROM play_user WHERE username = $1"#, username)
+        //     .fetch_optional(pool)
+        //     .await.unwrap();
 
-        return false;
+        // println!("the users>>>>> {:#?}", user);
+
+        // if user.len() > 0 {
+        //     return true;
+        // }
+
+        return true;
+    }
+
+    pub async fn create_user(pool: &Pool<Postgres>, email: String, username: String, hash: String) {
+        println!("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+        let user = sqlx::query!(r#"INSERT INTO play_user (email, username, hash) VALUES ($1, $2, $3)"#, email, username, hash)
+            .execute(pool).await.unwrap();
+
+        println!("THE OBTAINED USER------------->>>>>>>>>>> {:#?}", user);
     }
 }
