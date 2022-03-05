@@ -20,7 +20,7 @@ impl DbUser {
             .await.unwrap();
 
         if user.is_some() {
-            return false;
+            return true;
         }
 
         return false;

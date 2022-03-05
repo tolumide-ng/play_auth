@@ -20,6 +20,7 @@ pub async fn routes () -> Rocket<Build>{
             health, 
             create
         ])
+        // .register(catchers![not_found])
 }
 
 

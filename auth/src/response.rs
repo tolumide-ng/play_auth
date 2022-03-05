@@ -1,7 +1,9 @@
-use rocket::{Error, serde::json::Json};
+use std::io::Cursor;
+
+use rocket::{Error, serde::json::Json, response::{Responder, self}, Request, Response};
 use serde::{Serialize};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct AppResponder<T: Serialize> {
     code: u16,
     body: Option<T>,
@@ -18,24 +20,48 @@ impl<T> AppResponder<T> where T: Serialize {
             code: 200, message: "Success", body
         })
     }
+
+    pub fn reply_error(body: Option<T>, code: u16) -> Json<AppResponder<T>> {
+        Json(AppResponder {
+            message: "Error", code, body,
+        })
+    }
+
 }
 
+
+#[derive(Debug, Responder)]
+#[response(bound = "T: Serialize", status = 404)]
+pub struct NotFoundError<T>(Json<T>);
+
+
+#[derive(Debug, Responder)]
+#[response(bound = "T: Serialize", status = 500)]
+pub struct InternalServerError<T>(Json<T>);
+
+
+
 // impl<'r, T> Responder<'r, 'static> for AppResponder<T> where T: Serialize {
-//     fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
-//         Response::build().sized_body(5, Cursor::new(&self))
-//             .header(ContentType::new("application", "x-person")).ok()
+//     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+//         rocket_contrib::json::Json(self.clone()).respond_to(req)
 //     }
 // }
 
-
-// #[derive(Debug, Serialize)]
-// struct Task {}
-
 // #[catch(404)]
-// fn not_found<T: Serialize>(req: &Request) -> AppResponder<T> { 
+// pub fn not_found(req: &Request) -> AppResponder<&'static str> {
 //     AppResponder{
 //         code: 404,
-//         body: Some(Task{}),
-//         message: "".to_string()
+//         message: "Error",
+//         body: Some("Resource Not Found"),
+//     }
+//  }
+
+
+//  #[catch(500)]
+//  pub fn internal_server_error(req: &Request) -> AppResponder<&'static str> {
+//      AppResponder{
+//         code: 404,
+//         message: "Error",
+//         body: Some("Internal Server Error"),
 //     }
 //  }
