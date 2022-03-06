@@ -1,4 +1,6 @@
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, error::DatabaseError};
+
+use crate::{helpers::commons::{Str, DbResult}, errors::app::ApiError};
 
 
 #[derive(Debug)]
@@ -14,28 +16,29 @@ struct Row {
 }
 
 impl DbUser {
-    pub async fn email_exist(pool: &Pool<Postgres>, email: String, username: String) -> bool {
+    pub async fn email_exist(pool: &Pool<Postgres>, email: String, username: String) -> DbResult<bool> {
         let user = sqlx::query!(r#"SELECT email FROM play_user WHERE (email = $1) OR (username = $2)"#, email, username)
             .fetch_optional(pool)
-            .await.unwrap();
+            .await;
 
-        if user.is_some() {
-            return true;
+        match user {
+            Ok(exists) => { Ok(exists.is_some()) }
+            Err(e) => {
+                // tracing!
+                Err(ApiError::DatabaseError(e))
+            }
         }
-
-        return false;
     }
 
-    pub async fn create_user(pool: &Pool<Postgres>, email: String, username: String, hash: String) -> Option<bool> {
+    pub async fn create_user(pool: &Pool<Postgres>, email: String, username: String, hash: String) -> DbResult<bool> {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, username, hash) VALUES ($1, $2, $3)"#, email, username, hash)
             .execute(pool).await;
 
         if let Err(e) = user {
-            // todo!() - this here can be handled with tracing! so we can save it on our log
-            println!("THE ERROR THAT OCCURED >>> {:#?}", e);
-            return None
+            // todo!() - tracing!
+            return Err(ApiError::DatabaseError(e))
         }
 
-        return Some(true);
+        return Ok(true);
     }
 }
