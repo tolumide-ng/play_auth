@@ -1,26 +1,32 @@
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, types::chrono};
+use sqlx::Error::{RowNotFound};
 use uuid::Uuid;
 
-use crate::{helpers::commons::{Str, DbResult}, errors::app::ApiError};
+use crate::{helpers::commons::{DbResult}, errors::app::ApiError};
 
 
 #[derive(Debug)]
 pub struct DbUser;
 
+#[derive(Debug)]
 pub struct User {
     user_id: Uuid,
     hash: String,
     email: String,
     verified: bool,
+    #[warn(dead_code)]
+    username: Option<String>,
+    created_at: chrono::NaiveDateTime,
+    updated_at: chrono::NaiveDateTime,
 }
 
 impl User {
     pub fn get_hash(&self) -> String {
-        self.hash
+        self.hash.clone()
     }
 
     pub fn get_user(&self) -> (String, Uuid) {
-        (self.email, self.user_id)
+        (self.email.clone(), self.user_id.clone())
     }
 
     pub fn is_verified(&self) -> bool {
@@ -46,7 +52,7 @@ impl DbUser {
     }
 
     pub async fn create_user(pool: &Pool<Postgres>, email: String, hash: String) -> DbResult<bool> {
-        let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2, $3) RETURNING user_id"#, email, hash)
+        let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email, hash)
             .fetch_one(pool).await;
 
         println!("THE INSERTED {:#?}", user);
@@ -60,23 +66,19 @@ impl DbUser {
     }
 
     pub async fn email_exists(pool: &Pool<Postgres>, email: String) -> DbResult<Option<User>> {
-        let user = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#)
+        let res = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#, email)
             .fetch_one(pool)
             .await;
 
-        println!("DB RESPONSE {:#?}", user);
-        
-        match user {
-            Ok(the_user) => {
-                println!("THE RECEIVED USER {:#?}", the_user);
-                if the_user.is_some() {
-                    return Ok(Some(the_user));
-                }
-                return Ok(the_user)
-            },
-            Err(e) => {
-                return Err(ApiError::DatabaseError(e))
+        println!("DB RESPONSE {:#?}", res);
+
+        if let Err(e) = res {
+            return match e {
+                RowNotFound => {Ok(None)},
+                _ => {Err(ApiError::DatabaseError(e))}
             }
         }
+
+        Ok(Some(res.unwrap()))
     }
 }

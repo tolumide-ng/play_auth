@@ -9,7 +9,7 @@ use crate::settings::variables::EnvVars;
 pub trait DeserializeOwned: for<'de> Deserialize<'de> {}
 impl<T> DeserializeOwned for T where T: for<'de> Deserialize<'de> {}
 
-trait Jwt where Self: Serialize + DeserializeOwned {
+pub trait Jwt where Self: Serialize + DeserializeOwned {
 
     fn encode(&self) -> Result<String, jsonwebtoken::errors::Error> {
         let EnvVars {jwt_secret, ..} = EnvVars::new();
@@ -77,8 +77,6 @@ pub struct LoginJwt {
     subj: String,
 }
 
-impl Jwt for LoginJwt {}
-
 impl LoginJwt {
     pub fn new(email: String, user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
@@ -87,21 +85,24 @@ impl LoginJwt {
     }
 }
 
+impl Jwt for LoginJwt {}
+
 
 #[cfg(test)]
 mod test_signup_token {
     use super::*;
 
-    const SIGNUP_ID: Uuid = Uuid::new_v4();
-
+    
     #[test]
     fn generates_token_on_signup() {
+        let SIGNUP_ID: Uuid = Uuid::new_v4();
         let token = SignupJwt::new(SIGNUP_ID).encode();
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_signup_token_can_be_decoded() {
+        let SIGNUP_ID: Uuid = Uuid::new_v4();
         let encoded_token = SignupJwt::new(SIGNUP_ID).encode().unwrap();
         let decoded_token: Result<TokenData<SignupJwt>, _> = SignupJwt::decode(&encoded_token);
 
@@ -111,6 +112,7 @@ mod test_signup_token {
 
     #[test]
     fn signup_token_expires_after_two_hours() {
+        let SIGNUP_ID: Uuid = Uuid::new_v4();
         const TWO_HOURS: usize = 7200000; // Equivalent of two hours in ms
 
         let encoded_token = SignupJwt::new(SIGNUP_ID).encode().unwrap();
@@ -125,16 +127,17 @@ mod test_signup_token {
 #[cfg(test)]
 mod test_forgot_token {
     use super::*;
-    const FORGOT_UUID: Uuid = Uuid::new_v4();
 
     #[test]
     fn generates_token_on_forgot() {
+        let FORGOT_UUID: Uuid = Uuid::new_v4();
         let token = ForgotPasswordJwt::new(FORGOT_UUID).encode();
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_forgot_token_can_be_decoded() {
+        let FORGOT_UUID: Uuid = Uuid::new_v4();
         let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode().unwrap();
         let decoded_token: Result<TokenData<ForgotPasswordJwt>, _> = ForgotPasswordJwt::decode(&encoded_token);
 
@@ -146,6 +149,7 @@ mod test_forgot_token {
 
     #[test]
     fn forgot_token_expires_after_two_hours() {
+        let FORGOT_UUID: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
 
         let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode().unwrap();
@@ -163,16 +167,17 @@ mod test_forgot_token {
 mod test_login_token {
     use super::*;
     const LOGIN_EMAIL: &str = "user@ouremail.com";
-    const LOGIN_UUID: Uuid = Uuid::new_v4();
 
     #[test]
     fn generates_token_on_login() {
+        let LOGIN_UUID: Uuid = Uuid::new_v4();
         let token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode();
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_login_token_can_be_decoded() {
+        let LOGIN_UUID: Uuid = Uuid::new_v4();
         let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode().unwrap();
         let decoded_token: Result<TokenData<LoginJwt>, _> = LoginJwt::decode(&encoded_token);
 
@@ -184,9 +189,10 @@ mod test_login_token {
 
     #[test]
     fn login_token_expires_after_two_hours() {
+        let login_uuid: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
 
-        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode().unwrap();
+        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), login_uuid).encode().unwrap();
         let decoded_token: TokenData<LoginJwt> = LoginJwt::decode(&encoded_token).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;

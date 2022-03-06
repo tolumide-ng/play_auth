@@ -2,7 +2,7 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
-use crate::{base_repository::user::DbUser, settings::variables::EnvVars, helpers::{mail::{Email, MailType}, auth::{Password, SignupJwt}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError};
+use crate::{base_repository::user::DbUser, settings::variables::EnvVars, helpers::{mail::{Email, MailType}, auth::{Password}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError};
 
 
 #[derive(Deserialize, Serialize)]

@@ -41,7 +41,7 @@ pub enum ApiError {
     AuthorizationError(&'static str),
     #[error("Internal Server Error")]
     PasswordError(#[from] PError),
-    #[error("Please verify your account by clicking the email sent on verification")]
+    #[error("Please verify your account by clicking the email sent on signup")]
     UnverifiedAccount,
     
     // #[error(transparent)]

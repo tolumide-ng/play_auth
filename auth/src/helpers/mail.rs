@@ -28,7 +28,7 @@ impl Email {
     pub fn send_email(self) {
         // maybe just use Postfix
         let EnvVars { smtp_user, smtp_pass, smtp_server, .. } = EnvVars::new();
-        let mut person_name = self.recipient_email;
+        let mut person_name = self.recipient_email.clone();
 
         if let Some(name) = self.recipient_name {
             person_name = name;

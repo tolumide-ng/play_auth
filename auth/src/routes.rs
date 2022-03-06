@@ -4,7 +4,7 @@ use rocket::{Rocket, Build};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 
-use crate::controllers::{ create, health };
+use crate::controllers::{ create, health, user_login };
 use crate::settings::database::DbSettings;
 use crate::settings::variables::EnvVars;
 
@@ -17,8 +17,7 @@ pub async fn routes () -> Rocket<Build>{
         .manage(db_pool)
         .manage(EnvVars::new())
         .mount("/", routes![
-            health, 
-            create
+            health,  create, user_login
         ])
         // .register(catchers![not_found])
 }

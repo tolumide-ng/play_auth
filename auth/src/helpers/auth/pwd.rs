@@ -1,7 +1,7 @@
 use argon2::{
     password_hash::{
         rand_core::OsRng, 
-        PasswordHasher, SaltString, PasswordHashString
+        PasswordHasher, SaltString
     },
     Argon2, PasswordHash, PasswordVerifier
 };
@@ -9,7 +9,7 @@ use argon2::{Algorithm::Argon2id, Version::V0x13, Params};
 use lazy_static::lazy_static;
 use fancy_regex::Regex;
 
-use crate::{settings::variables::EnvVars, errors::app::ApiError};
+use crate::{settings::variables::EnvVars};
 
 
 pub struct Password(String);
