@@ -21,9 +21,11 @@ pub async fn user_login(
     let user = DbUser::email_exists(pool, email).await?;
 
     if let Some(db_user) = user {
+        // let User { email, password }
         if Password::is_same(db_user.get_hash(), password) {
             if db_user.is_verified() {
-                let loginJwt = LoginJwt::new(email);
+                let info = db_user.get_user();
+                let loginJwt = LoginJwt::new(info.0, info.1);
                 // return Ok(ApiSuccess::reply_success(body))
                 // let jwt = Login
             }

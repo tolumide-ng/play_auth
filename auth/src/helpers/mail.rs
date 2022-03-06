@@ -11,13 +11,13 @@ pub enum MailType {
 
 pub struct Email {
     recipient_email: String,
-    recipient_name: String,
+    recipient_name: Option<String>,
     email_type: MailType,
 }
 
 
 impl Email {
-    pub fn new(recipient_email: String, recipient_name: String, email_type: MailType) -> Self {
+    pub fn new(recipient_email: String, recipient_name: Option<String>, email_type: MailType) -> Self {
         Self {
             recipient_email, 
             recipient_name,
@@ -28,9 +28,14 @@ impl Email {
     pub fn send_email(self) {
         // maybe just use Postfix
         let EnvVars { smtp_user, smtp_pass, smtp_server, .. } = EnvVars::new();
+        let mut person_name = self.recipient_email;
+
+        if let Some(name) = self.recipient_name {
+            person_name = name;
+        }
         let email = Message::builder()
             .from("Dire <noreply@gmail.com>".parse().unwrap())
-            .to(format!("{} <{}>", self.recipient_name, self.recipient_email).parse().unwrap())
+            .to(format!("{} <{}>", person_name, self.recipient_email).parse().unwrap())
             .subject("Welcome to the app with no name yet!")
             // use html file styled with css in this case
             .body(String::from(r#"Thank you for signing up with us :wink, please 

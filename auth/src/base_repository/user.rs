@@ -1,4 +1,5 @@
 use sqlx::{Pool, Postgres};
+use uuid::Uuid;
 
 use crate::{helpers::commons::{Str, DbResult}, errors::app::ApiError};
 
@@ -7,7 +8,7 @@ use crate::{helpers::commons::{Str, DbResult}, errors::app::ApiError};
 pub struct DbUser;
 
 pub struct User {
-    user_id: uuid::Uuid,
+    user_id: Uuid,
     hash: String,
     email: String,
     verified: bool,
@@ -18,8 +19,8 @@ impl User {
         self.hash
     }
 
-    pub fn get_user(&self) -> (String, String) {
-        (self.email, self.user_id.to_string())
+    pub fn get_user(&self) -> (String, Uuid) {
+        (self.email, self.user_id)
     }
 
     pub fn is_verified(&self) -> bool {

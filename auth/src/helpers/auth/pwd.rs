@@ -3,13 +3,13 @@ use argon2::{
         rand_core::OsRng, 
         PasswordHasher, SaltString, PasswordHashString
     },
-    Argon2
+    Argon2, PasswordHash, PasswordVerifier
 };
 use argon2::{Algorithm::Argon2id, Version::V0x13, Params};
 use lazy_static::lazy_static;
 use fancy_regex::Regex;
 
-use crate::settings::variables::EnvVars;
+use crate::{settings::variables::EnvVars, errors::app::ApiError};
 
 
 pub struct Password(String);
@@ -49,7 +49,10 @@ impl Password {
         self.0
     }
 
-    pub fn compare() {}
+    pub fn is_same(hash: String, password: String) -> bool {
+        let parsed_hash = PasswordHash::new(&hash).unwrap();
+        Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
+    }
 }
 
 
