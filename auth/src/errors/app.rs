@@ -7,6 +7,8 @@ use rocket::{
     Request, Response,
 };
 use serde::{Deserialize, Serialize};
+use argon2::Error as PError;
+// use argon2::password_hash::Error;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,13 +35,17 @@ pub enum ApiError {
     ValidationError(&'static str),
     #[error("{0}")]
     Conflict(&'static str),
+    #[error("0")]
+    AuthenticationError(&'static str),
+    #[error("Authorization Error")]
+    AuthorizationError(&'static str),
+    #[error("Internal Server Error")]
+    PasswordError(#[from] PError),
+    #[error("Please verify your account by clicking the email sent on verification")]
+    UnverifiedAccount,
     
     // #[error(transparent)]
     // UnexpectedError(#[from] anyhow::Error),
-    // #[error("Username or Password is invalid")]
-    // AuthenticationError(String),
-    // #[error("Authorization Error")]
-    // AuthorizationError(String),
 }
 
 impl ApiError {
@@ -49,9 +55,10 @@ impl ApiError {
 
         match self {
             ValidationError(_) | BadRequest(_) => Status::BadRequest,
-            DatabaseError(_) => Status::InternalServerError,
-            JwtError(_) => Status::Unauthorized,
+            DatabaseError(_) | PasswordError(_) => Status::InternalServerError,
+            JwtError(_) | AuthenticationError(_) => Status::Unauthorized,
             Conflict(_) => Status::Conflict,
+            AuthorizationError(_) | UnverifiedAccount => Status::Forbidden,
         }
     }
 }
