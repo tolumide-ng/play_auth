@@ -4,10 +4,10 @@ use super::variables::{EnvVars, AppEnv};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct DbSettings {
+    pub host: String,
+    pub port: u16,
     pub username: String,
     pub password: String,
-    pub port: u16,
-    pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
 }

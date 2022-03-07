@@ -1,0 +1,7 @@
+db:
+  host: ${DB_LOCAL_HOST}
+  port: ${DB_LOCAL_PORT}
+  username: ${DB_LOCAL_USERNAME}
+  password: ${DB_LOCAL_PASSWORD}
+  database_name: ${DB_LOCAL_NAME}
+  require_ssl: true

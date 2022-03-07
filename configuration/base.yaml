@@ -1,0 +1,19 @@
+db:
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  username: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+  database_name: ${DB_NAME}
+  require_ssl: true
+app:
+  port: ${APP_PORT}
+  # base_url: ${BASE_URL}
+  env: ${APP_ENV}
+  m_cost: ${M_COST}
+  p_cost: ${P_COST}
+  t_cost: ${T_COST}
+  jwt_secret: ${JWT_SECRET}
+email:
+  smtp_user: ${SMTP_USER}
+  smtp_pass: ${SMTP_PASS}
+  smtp_server: ${SMTP_SERVER}
