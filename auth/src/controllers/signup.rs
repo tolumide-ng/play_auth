@@ -2,7 +2,7 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
-use crate::{base_repository::user::DbUser, settings::variables::EnvVars, helpers::{mail::{Email, MailType}, auth::{Password}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError};
+use crate::{base_repository::user::DbUser, helpers::{mail::{Email, MailType}, auth::{Password}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
 
 #[derive(Deserialize, Serialize)]
@@ -17,14 +17,16 @@ pub struct User {
 
 #[post("/create", data = "<user>")]
 pub async fn create(
-    user: Json<User>, pool: &State<Pool<Postgres>>, _env: &State<EnvVars>
+    user: Json<User>, 
+    pool: &State<Pool<Postgres>>, 
+    envs: &State<Settings>
 ) -> ApiResult<Json<ApiSuccess<Str>>> {
     let User {email, password} = user.0;
 
     let user_exists = DbUser::email_exists(pool, email.clone()).await?;
 
     if user_exists.is_none() {
-        let pwd = Password::new(password.clone());
+        let pwd = Password::new(password.clone(), &envs.app);
         match pwd {
             Some(hash) => {
                 // Password is ok and the username/email is unique

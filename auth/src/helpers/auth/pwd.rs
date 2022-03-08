@@ -9,15 +9,16 @@ use argon2::{Algorithm::Argon2id, Version::V0x13, Params};
 use lazy_static::lazy_static;
 use fancy_regex::Regex;
 
-use crate::{settings::variables::EnvVars};
+use crate::{settings::{app::AppSettings}};
+use crate::helpers::test_helpers;
 
 
 pub struct Password(String);
 
 impl Password {
-    pub fn new(pwd: String) -> Option<Self> {
+    pub fn new(pwd: String, app: &AppSettings) -> Option<Self> {
 
-        let EnvVars { m_cost, p_cost, t_cost, .. } = EnvVars::new();
+        let AppSettings { m_cost, p_cost, t_cost, .. } = *app;
 
         if Password::is_valid(&pwd) {
             let salt = SaltString::generate(&mut OsRng);
@@ -56,44 +57,44 @@ impl Password {
 }
 
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_helpers::get_appsettings;
 
     #[test]
     fn alphabets_only_password_is_invalid() {
         let pwd = "password".to_string();
-        assert!(Password::new(pwd).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_none());
     }
 
     #[test]
     fn numbers_only_password_is_invalid() {
         let pwd = "12345".to_string();
-        assert!(Password::new(pwd).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_none());
     }
 
     #[test]
     fn alphabets_and_numbers_only_is_invalid() {
         let pwd = "1234password".to_string();
-        assert!(Password::new(pwd).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_none());
     }
 
     #[test]
     fn password_with_short_length_is_invalid() {
         let pwd = "ATyp23*".to_string();
-        assert!(Password::new(pwd).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_none());
     }
 
     #[test]
     fn password_with_special_characters_only_is_invalid() {
         let pwd = "********#######".to_string();
-        assert!(Password::new(pwd).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_none());
     }
 
     #[test]
     fn valid_password() {
         let pwd = "Authentication1234\"".to_string();
-        assert!(Password::new(pwd).is_some());
+        assert!(Password::new(pwd, &get_appsettings()).is_some());
     }
 }

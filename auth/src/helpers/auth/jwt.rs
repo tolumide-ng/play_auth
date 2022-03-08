@@ -4,20 +4,21 @@ use jsonwebtoken::{encode, EncodingKey, Header, decode, DecodingKey, Validation,
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::settings::variables::EnvVars;
+use crate::settings::{app::AppSettings};
+use crate::helpers::test_helpers::get_appsettings;
 
 pub trait DeserializeOwned: for<'de> Deserialize<'de> {}
 impl<T> DeserializeOwned for T where T: for<'de> Deserialize<'de> {}
 
 pub trait Jwt where Self: Serialize + DeserializeOwned {
 
-    fn encode(&self) -> Result<String, jsonwebtoken::errors::Error> {
-        let EnvVars {jwt_secret, ..} = EnvVars::new();
+    fn encode(&self, app: &AppSettings) -> Result<String, jsonwebtoken::errors::Error> {
+        let AppSettings { jwt_secret, ..} = app;
         encode(&Header::default(), &self, &EncodingKey::from_secret(&jwt_secret.as_ref()))
     }
 
-    fn decode<T: DeserializeOwned>(token: &str) -> Result<TokenData<T>, jsonwebtoken::errors::Error> {
-        let EnvVars { jwt_secret, .. } = EnvVars::new();
+    fn decode<T: DeserializeOwned>(token: &str, app: &AppSettings) -> Result<TokenData<T>, jsonwebtoken::errors::Error> {
+        let AppSettings { jwt_secret, .. } = app;
         decode::<T>(token, &DecodingKey::from_secret(jwt_secret.as_ref()), &Validation::new(jsonwebtoken::Algorithm::HS256))
     }
 }
@@ -92,19 +93,22 @@ impl Jwt for LoginJwt {}
 mod test_signup_token {
     use super::*;
 
+   
     
     #[test]
     fn generates_token_on_signup() {
         let SIGNUP_ID: Uuid = Uuid::new_v4();
-        let token = SignupJwt::new(SIGNUP_ID).encode();
+        let token = SignupJwt::new(SIGNUP_ID).encode(&get_appsettings());
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_signup_token_can_be_decoded() {
         let SIGNUP_ID: Uuid = Uuid::new_v4();
-        let encoded_token = SignupJwt::new(SIGNUP_ID).encode().unwrap();
-        let decoded_token: Result<TokenData<SignupJwt>, _> = SignupJwt::decode(&encoded_token);
+        let envs = get_appsettings();
+
+        let encoded_token = SignupJwt::new(SIGNUP_ID).encode(&envs).unwrap();
+        let decoded_token: Result<TokenData<SignupJwt>, _> = SignupJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
         assert_eq!(decoded_token.unwrap().claims.subj, "Signup".to_string());
@@ -114,9 +118,10 @@ mod test_signup_token {
     fn signup_token_expires_after_two_hours() {
         let SIGNUP_ID: Uuid = Uuid::new_v4();
         const TWO_HOURS: usize = 7200000; // Equivalent of two hours in ms
+        let envs = get_appsettings();
 
-        let encoded_token = SignupJwt::new(SIGNUP_ID).encode().unwrap();
-        let decoded_token: TokenData<SignupJwt> = SignupJwt::decode(&encoded_token).unwrap();
+        let encoded_token = SignupJwt::new(SIGNUP_ID).encode(&envs).unwrap();
+        let decoded_token: TokenData<SignupJwt> = SignupJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
         assert_eq!(active_period, TWO_HOURS);
@@ -131,15 +136,19 @@ mod test_forgot_token {
     #[test]
     fn generates_token_on_forgot() {
         let FORGOT_UUID: Uuid = Uuid::new_v4();
-        let token = ForgotPasswordJwt::new(FORGOT_UUID).encode();
+        let envs = get_appsettings();
+
+        let token = ForgotPasswordJwt::new(FORGOT_UUID).encode(&envs);
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_forgot_token_can_be_decoded() {
         let FORGOT_UUID: Uuid = Uuid::new_v4();
-        let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode().unwrap();
-        let decoded_token: Result<TokenData<ForgotPasswordJwt>, _> = ForgotPasswordJwt::decode(&encoded_token);
+        let envs = get_appsettings();
+
+        let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode(&envs).unwrap();
+        let decoded_token: Result<TokenData<ForgotPasswordJwt>, _> = ForgotPasswordJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
         let token = decoded_token.unwrap();
@@ -151,9 +160,10 @@ mod test_forgot_token {
     fn forgot_token_expires_after_two_hours() {
         let FORGOT_UUID: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
+        let envs = get_appsettings();
 
-        let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode().unwrap();
-        let decoded_token: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&encoded_token).unwrap();
+        let encoded_token = ForgotPasswordJwt::new(FORGOT_UUID).encode(&envs).unwrap();
+        let decoded_token: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
         assert_eq!(active_period, TWENTY_MINUTES);
@@ -171,15 +181,19 @@ mod test_login_token {
     #[test]
     fn generates_token_on_login() {
         let LOGIN_UUID: Uuid = Uuid::new_v4();
-        let token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode();
+        let envs = get_appsettings();
+
+        let token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode(&envs);
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_login_token_can_be_decoded() {
         let LOGIN_UUID: Uuid = Uuid::new_v4();
-        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode().unwrap();
-        let decoded_token: Result<TokenData<LoginJwt>, _> = LoginJwt::decode(&encoded_token);
+        let envs = get_appsettings();
+
+        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), LOGIN_UUID).encode(&envs).unwrap();
+        let decoded_token: Result<TokenData<LoginJwt>, _> = LoginJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
         let token = decoded_token.unwrap();
@@ -191,9 +205,10 @@ mod test_login_token {
     fn login_token_expires_after_two_hours() {
         let login_uuid: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
+        let envs = get_appsettings();
 
-        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), login_uuid).encode().unwrap();
-        let decoded_token: TokenData<LoginJwt> = LoginJwt::decode(&encoded_token).unwrap();
+        let encoded_token = LoginJwt::new(LOGIN_EMAIL.to_string(), login_uuid).encode(&envs).unwrap();
+        let decoded_token: TokenData<LoginJwt> = LoginJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
         assert_eq!(active_period, TWENTY_MINUTES);

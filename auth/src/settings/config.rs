@@ -1,6 +1,7 @@
 use std::convert::TryInto;
-use config::{Environment, ConfigBuilder, builder::DefaultState};
-use serde::{Deserialize, Serialize};
+use config::{ConfigBuilder, builder::DefaultState};
+use rocket::{fairing::{Fairing, Info, self, Kind}, Rocket, Build};
+use serde::{Deserialize};
 
 use crate::settings::{database::DbSettings, email::EmailSettings, app::AppSettings};
 
@@ -13,6 +14,18 @@ pub struct Settings {
     pub db: DbSettings,
     pub app: AppSettings,
     pub email: EmailSettings,
+}
+
+#[rocket::async_trait]
+impl Fairing for Settings {
+    fn info(&self) -> Info {
+        Info { name: "Verify required Env Variables", kind: Kind::Ignite }
+    }
+
+    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+        Ok(rocket)
+    }
+
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
@@ -30,6 +43,5 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(config::File::from(config_dir.join("base")).required(true))
         .add_source(config::File::from(config_dir.join(app_env.to_string())).required(true));
 
-
-    settings.build().unwrap().try_deserialize()
+    settings.build()?.try_deserialize()
 }

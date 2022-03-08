@@ -1,9 +1,10 @@
 #[macro_use] extern crate rocket;
 
-use auth::{routes::routes};
+use auth::{routes::build, settings::config};
 
 
 #[launch]
 async fn rocket() -> _ {
-    routes().await
+    let config = config::get_configuration().unwrap();
+    build(config).await
 }

@@ -1,7 +1,9 @@
 db:
   host: ${DB_LOCAL_HOST}
-  port: ${DB_LOCAL_PORT}
+  # port: ${DB_LOCAL_PORT}
+  port: 5432 # need to find a way to handle this since serde_aux won't parse it because it to u16 as it is an env variable
+  # use db_url instead?
   username: ${DB_LOCAL_USERNAME}
   password: ${DB_LOCAL_PASSWORD}
   database_name: ${DB_LOCAL_NAME}
-  require_ssl: true
+  require_ssl: false
