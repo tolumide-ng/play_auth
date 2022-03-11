@@ -23,7 +23,7 @@ impl Password {
         if Password::is_valid(&pwd) {
             let salt = SaltString::generate(&mut OsRng);
             // tood()! should be secrets
-            let params = Params::new(m_cost, t_cost, p_cost, None).unwrap();
+            let params = Params::new(m_cost as u32, t_cost as u32, p_cost as u32, None).unwrap();
             let argon2 = Argon2::new(Argon2id, V0x13, params);
             let pwd_bytes = pwd.as_bytes().clone();
             let pwd_hash = argon2.hash_password(pwd_bytes, &salt).unwrap().to_string();

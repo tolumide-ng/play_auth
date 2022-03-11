@@ -30,6 +30,7 @@ lettre = { version = "0.10.0-rc.4", features = ["rustls-tls"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 jsonwebtoken = {version = "8", default-features = false }
 config = { version = "0.12.0", features = ["yaml"]}
+serde-with-expand-env = "1.0.0"
 
 
 [dependencies.rocket]
