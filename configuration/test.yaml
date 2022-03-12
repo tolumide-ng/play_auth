@@ -1,0 +1,7 @@
+db:
+  host: ${DB_TEST_HOST}
+  port: ${DB_TEST_PORT}
+  username: ${DB_TEST_USERNAME}
+  password: ${DB_TEST_PASSWORD}
+  database_name: ${DB_TEST_NAME}
+  require_ssl: false

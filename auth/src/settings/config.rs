@@ -26,14 +26,19 @@ impl Fairing for Settings {
 
 }
 
+
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     dotenv().ok();
     let app_env: AppEnv = std::env::var("APP_ENV")
     .unwrap_or_else(|_| "local".into())
     .try_into().expect("Failed to parse APP_ENV");
-    
+
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
-    let config_dir = base_path.join("configuration");
+    let mut config_dir = base_path.join("configuration");
+
+    if app_env.to_string().to_lowercase() == "test" {
+        config_dir = base_path.join("../configuration");
+    }
 
     let settings = ConfigBuilder::<DefaultState>::default()
         .add_source(config::File::from(config_dir.join("base")).required(true))

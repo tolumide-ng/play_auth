@@ -8,7 +8,6 @@ use crate::{base_repository::user::DbUser, helpers::{mail::{Email, MailType}, au
 #[derive(Deserialize, Serialize)]
 pub struct User {
     email: String,
-    // username: String,
     password: String,
 }
 
