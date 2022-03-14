@@ -7,12 +7,14 @@ use dotenv::dotenv;
 use crate::settings::{database::DbSettings, email::EmailSettings, app::AppSettings};
 use crate::settings::variables::AppEnv;
 
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
     pub db: DbSettings,
     pub app: AppSettings,
     pub email: EmailSettings,
 }
+
 
 #[rocket::async_trait]
 impl Fairing for Settings {
@@ -32,7 +34,6 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     let app_env: AppEnv = std::env::var("APP_ENV")
     .unwrap_or_else(|_| "local".into())
     .try_into().expect("Failed to parse APP_ENV");
-
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let mut config_dir = base_path.join("configuration");
 

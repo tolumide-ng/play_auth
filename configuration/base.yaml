@@ -1,10 +1,11 @@
 db:
   host: ${DB_HOST}
-  # port: ${DB_PORT}
-  port: ${DB_PORT} # need to find a way to handle this since serde_aux won't parse it because it to u16 as it is an env variable
+  port: ${DB_PORT}
+  # port: 5432
   username: ${DB_USERNAME}
   password: ${DB_PASSWORD}
   database_name: ${DB_NAME}
+  # db_url: ${DB_URL}
   require_ssl: true
 app:
   port: ${APP_PORT}
@@ -13,6 +14,9 @@ app:
   m_cost: ${M_COST}
   p_cost: ${P_COST}
   t_cost: ${T_COST}
+  # m_cost: 15000
+  # p_cost: 1
+  # t_cost: 2
   jwt_secret: ${JWT_SECRET}
 email:
   smtp_user: ${SMTP_USER}

@@ -1,6 +1,7 @@
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
+use dotenv::dotenv;
 
 use crate::{base_repository::user::DbUser, helpers::{mail::{Email, MailType}, auth::{Password}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
@@ -20,21 +21,25 @@ pub async fn create(
     pool: &State<Pool<Postgres>>, 
     envs: &State<Settings>
 ) -> ApiResult<Json<ApiSuccess<Str>>> {
+    dotenv().ok();
     let User {email, password} = user.0;
-
+    // println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     let user_exists = DbUser::email_exists(pool, email.clone()).await?;
+
+    // println!("DOES NOT EXUST>::::: {:#?}", user_exists);
 
     if user_exists.is_none() {
         let pwd = Password::new(password.clone(), &envs.app);
         match pwd {
             Some(hash) => {
                 // Password is ok and the username/email is unique
+                // println!("::::::::::::::::::::::::::::::::::::::::");
                 let user = DbUser::create_user(pool, email.clone(), hash.get_val()).await?;
 
                 if user {
                     // generate jwt 
                     // SignupJwt::new(signup_id)
-                    Email::new(email, None, MailType::Signup("")).send_email();
+                    Email::new(email, None, MailType::Signup("")).send_email(&envs.email);
                     return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
                 }
             },

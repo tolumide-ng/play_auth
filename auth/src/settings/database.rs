@@ -1,24 +1,21 @@
 use serde::Deserialize;
 use sqlx::{postgres::{PgConnectOptions, PgSslMode}};
-use serde_aux::field_attributes::deserialize_number_from_string;
-use serde_with_expand_env::with_expand_envs;
-use std::env;
-
-// use serde::{de::Error, Deserialize, Deserializer};
-// use std::fmt::Display;
-// use std::str::FromStr;
-
-
+// use serde_with_expand_env::with_expand_envs;
+use crate::helpers::variables::with_expand_envs;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DbSettings {
+    #[serde(deserialize_with = "with_expand_envs")]
     pub host: String,
-    // #[serde(deserialize_with = "deserialize_number_from_string")]
     #[serde(deserialize_with = "with_expand_envs")]
     pub port: u16,
+    #[serde(deserialize_with = "with_expand_envs")]
     pub username: String,
+    #[serde(deserialize_with = "with_expand_envs")]
     pub password: String,
+    #[serde(deserialize_with = "with_expand_envs")]
     pub database_name: String,
+    #[serde(deserialize_with = "with_expand_envs")]
     pub require_ssl: bool,
     // pub db_url: String,
 }

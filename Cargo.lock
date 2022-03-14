@@ -138,6 +138,7 @@ dependencies = [
  "serde-with-expand-env",
  "serde_derive",
  "serde_json",
+ "shellexpand",
  "sqlx",
  "thiserror",
  "uuid",

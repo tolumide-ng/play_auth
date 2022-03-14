@@ -15,4 +15,4 @@ run_auth:
 
 .PHONY: Update sqlx-data.json for the workspace
 update_migrations:
-	cargo sqlx prepare --merge
+	cargo sqlx prepare --merged
