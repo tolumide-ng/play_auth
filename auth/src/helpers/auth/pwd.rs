@@ -29,7 +29,6 @@ impl Password {
             let pwd_hash = argon2.hash_password(pwd_bytes, &salt).unwrap().to_string();
 
             // return Some(Self(PasswordHashString::new(&pwd_hash).unwrap()))
-            println!("THIS IS THE PASSWORD HASH {:#?}", pwd_hash);
             return Some(Self(pwd_hash))
         }
 

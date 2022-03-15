@@ -23,17 +23,12 @@ pub async fn create(
 ) -> ApiResult<Json<ApiSuccess<Str>>> {
     dotenv().ok();
     let User {email, password} = user.0;
-    // println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     let user_exists = DbUser::email_exists(pool, email.clone()).await?;
-
-    // println!("DOES NOT EXUST>::::: {:#?}", user_exists);
 
     if user_exists.is_none() {
         let pwd = Password::new(password.clone(), &envs.app);
         match pwd {
             Some(hash) => {
-                // Password is ok and the username/email is unique
-                // println!("::::::::::::::::::::::::::::::::::::::::");
                 let user = DbUser::create_user(pool, email.clone(), hash.get_val()).await?;
 
                 if user {

@@ -55,8 +55,6 @@ impl DbUser {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email, hash)
             .fetch_one(pool).await;
 
-        // println!("THE INSERTED {:#?}", user);
-
         if let Err(e) = user {
             // todo!() - tracing!
             return Err(ApiError::DatabaseError(e))
@@ -68,13 +66,9 @@ impl DbUser {
     pub async fn email_exists(pool: &Pool<Postgres>, email: String) -> DbResult<Option<User>> {
         use dotenv::dotenv;
         dotenv().ok();
-        // println!("WHAT THE POIOIOL LOOKS LIKE {:#?}", pool);
-        // println!("{{{{{{{{{{{{{{{{AYOMIDE IS HERE email {:#?}", email);
         let res = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#, email)
             .fetch_one(pool)
             .await;
-
-        // println!("DB RESPONSE {:#?}", res);
 
         if let Err(e) = res {
             return match e {

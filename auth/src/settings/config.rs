@@ -29,6 +29,7 @@ impl Fairing for Settings {
 }
 
 
+
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     dotenv().ok();
     let app_env: AppEnv = std::env::var("APP_ENV")

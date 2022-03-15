@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use sqlx::{postgres::{PgConnectOptions, PgSslMode}};
-// use serde_with_expand_env::with_expand_envs;
-use crate::helpers::variables::with_expand_envs;
+use serde_with_expand_env::with_expand_envs;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DbSettings {
