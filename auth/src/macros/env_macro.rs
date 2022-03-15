@@ -72,3 +72,10 @@ macro_rules! handle_envs {
     
     // ($tem:item &tem1:tt) => {};
 }
+
+
+#[macro_export]
+macro_rules! handle_structs {
+    () => {};
+    (AppBees: $struct_name:ident {$($field:ident:$val:expr),*,} ) => {}
+}

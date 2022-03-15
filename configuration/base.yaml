@@ -1,24 +1,16 @@
 db:
-  host: ${DB_HOST}
-  port: ${DB_PORT}
+  host: localhost
+  port: 5432
   # port: 5432
-  username: ${DB_USERNAME}
-  password: ${DB_PASSWORD}
-  database_name: ${DB_NAME}
-  # db_url: ${DB_URL}
+  username: tolumideshopein
+  password: password
+  database_name: play_auth
   require_ssl: true
 app:
-  port: ${APP_PORT}
-  # base_url: ${BASE_URL}
-  env: ${APP_ENV}
-  m_cost: ${M_COST}
-  p_cost: ${P_COST}
-  t_cost: ${T_COST}
-  # m_cost: 15000
-  # p_cost: 1
-  # t_cost: 2
-  jwt_secret: ${JWT_SECRET}
-email:
-  smtp_user: ${SMTP_USER}
-  smtp_pass: ${SMTP_PASS}
-  smtp_server: ${SMTP_SERVER}
+  port: 8000
+  env: local
+  m_cost: 15000
+  p_cost: 1
+  t_cost: 2
+  jwt_secret: aSampleYUIJWTYIOLSNDKLSECZZRETdsjk9210921secret
+# email:

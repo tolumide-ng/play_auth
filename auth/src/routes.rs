@@ -9,7 +9,9 @@ use crate::settings::database::DbSettings;
 
 pub async fn build (config: Settings) -> Rocket<Build>{
     let db_pool = get_pool(&config.db);
-    
+
+    println!("{{{{{{{{|||||||||||||||||| {:#?}", config);
+
     rocket::build()
         .attach(config.clone())
         .manage(db_pool)
@@ -27,3 +29,4 @@ pub async fn build (config: Settings) -> Rocket<Build>{
             .connect_timeout(Duration::from_secs(30))
             .connect_lazy_with(config.with_db())
     }
+
