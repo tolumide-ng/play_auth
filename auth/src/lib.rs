@@ -8,3 +8,7 @@ pub mod helpers;
 pub mod settings;
 pub mod response;
 pub mod macros;
+
+
+#[cfg(feature = "test")]
+pub mod stubs;

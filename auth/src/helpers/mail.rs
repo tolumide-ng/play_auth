@@ -1,10 +1,13 @@
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport, Transport};
+use lettre::{Message, Transport};
 
-use crate::settings::app::AppSettings;
+
+#[cfg(feature = "test")]
+use crate::stubs::email::SmtpTransport;
+#[cfg(not(feature = "test"))]
+use lettre::SmtpTransport;
+
 use crate::settings::email::EmailSettings;
-use crate::settings::variables::EnvVars;
-
 pub enum MailType {
     // signup or forgot_pwd key/jwt
     Signup(&'static str),

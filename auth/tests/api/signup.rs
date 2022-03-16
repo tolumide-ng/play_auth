@@ -3,8 +3,9 @@ use auth::routes::build;
 use auth::settings::config;
 use fake::Dummy;
 use rand::Rng;
-use rand::seq::SliceRandom;
 use rocket::http::{ContentType, Status};
+use rand::seq::SliceRandom;
+use rocket::tokio::io::AsyncReadExt;
 use rocket::launch;
 
 // #[launch]
@@ -32,12 +33,27 @@ impl Dummy<Pwd> for &'static str {
 
 
 
+
 #[cfg(test)]
 mod test {
     use fake::Fake;
+    // use mockall::*;
+    use mockall::predicate::*;
+    use serde::Deserialize;
+    use serde_json::Value;
 
     use super::*;
-    use crate::helpers::app::{get_test_config, get_client};
+    use crate::helpers::app::{get_client};
+
+
+    #[derive(serde::Deserialize, Debug)]
+    struct SuccessResponse {
+        code: i32,
+        body: String,
+        message: String,
+    }
+
+
 
     #[rocket::async_test]
     async fn test_invalid_signup_request() {
@@ -74,9 +90,20 @@ mod test {
 
         let response = client.post(CREATE)
             .header(ContentType::JSON)
-            .body(req_body).dispatch().await; 
+            .body(req_body).dispatch().await;
 
-        println!("---------------------------------THE------------------ {:#?}", response.into_string().await.unwrap());
-        assert_eq!(1, 2)
+        // println!(":::::::::::: RESPONSE.>>>>>>>>>>>>>>>>>>> {:#?}", response.into_string().await.unwrap());
+        assert_eq!(&response.status(), &Status::Ok);
+        assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
+        // let res = response.into_json::<SuccessResponse>().await;
+        let res = response.into_bytes().await.unwrap();
+        let bres: Value = serde_json::from_slice(&res).unwrap();
+        let body: SuccessResponse = serde_json::from_value(bres).unwrap();
+
+        assert_eq!(body.code, 200);
+        assert!(body.body.contains("check your email"));
+        assert_eq!(body.message, "Success".to_string());
     }
+
+
 }
