@@ -56,6 +56,7 @@ impl Password {
 }
 
 
+
 #[cfg(test)]
 mod tests {
     use super::*;

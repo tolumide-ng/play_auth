@@ -1,11 +1,10 @@
 db:
   host: localhost
   port: 5432
-  # port: 5432
   username: tolumideshopein
   password: password
   database_name: play_auth
-  require_ssl: true
+  require_ssl: false
 app:
   port: 8000
   env: local
