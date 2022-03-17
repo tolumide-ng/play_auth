@@ -1,10 +1,43 @@
 use std::env;
+use auth::routes::get_pool;
 use rocket::local::asynchronous::Client;
 use rocket::local::asynchronous::LocalResponse;
 use serde_json::Value;
 
 use auth::routes::build;
 use auth::settings::config::{get_configuration, Settings};
+use sqlx::Pool;
+use sqlx::Postgres;
+
+pub struct TestClient {
+    app: Client,
+    db: Pool<Postgres>,
+}
+
+impl TestClient {
+    pub fn new(app: Client, db: Pool<Postgres>) -> Self {
+        Self {app, db}
+    }
+
+    pub fn app(&self) -> &Client {
+        &self.app
+    }
+
+    pub fn db(&self) -> &Pool<Postgres> {
+        &self.db
+    }
+
+    pub async fn clean_db(&self) {
+        let abc = sqlx::query(r#"DELETE FROM play_user"#).execute(&self.db).await;
+    }
+
+    pub async fn clean_email_in_db(&self, email: String) {
+        sqlx::query(r#"DELETE FROM play_user WHERE (email=$1)"#)
+            .bind(email)
+            .execute(&self.db).await.unwrap();
+    }
+}
+
 
 pub fn get_test_config() -> Settings {
     let config = {
@@ -15,10 +48,12 @@ pub fn get_test_config() -> Settings {
 }
 
 
-pub async fn get_client() -> Client {
+pub async fn get_client() -> TestClient {
     let config = get_test_config();
+    let db_pool = get_pool(&config.db);
     let app = build(config).await;
-    Client::tracked(app).await.expect("Could not create test client")
+    
+    TestClient::new(Client::tracked(app).await.expect("Could not create test client"), db_pool)
 }
 
 

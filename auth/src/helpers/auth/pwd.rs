@@ -10,7 +10,6 @@ use lazy_static::lazy_static;
 use fancy_regex::Regex;
 
 use crate::{settings::{app::AppSettings}};
-use crate::helpers::test_helpers;
 
 
 pub struct Password(String);
@@ -56,11 +55,10 @@ impl Password {
 }
 
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_helpers::get_appsettings;
+    use crate::helpers::test_helpers::get_appsettings;
 
     #[test]
     fn alphabets_only_password_is_invalid() {

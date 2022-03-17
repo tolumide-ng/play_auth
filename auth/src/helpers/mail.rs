@@ -1,5 +1,8 @@
+use fancy_regex::Regex;
+use lazy_static::lazy_static;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, Transport};
+use std::fmt;
 
 
 #[cfg(feature = "test")]
@@ -15,25 +18,47 @@ pub enum MailType {
 }
 
 pub struct Email {
-    recipient_email: String,
+    recipient_email: ValidEmail,
     recipient_name: Option<String>,
     email_type: MailType,
 }
 
+#[derive(Debug, Clone)]
+pub struct ValidEmail(String);
+
+impl std::fmt::Display for ValidEmail {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
 
 impl Email {
-    pub fn new(recipient_email: String, recipient_name: Option<String>, email_type: MailType) -> Self {
+    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType) -> Self {
         Self {
-            recipient_email, 
+            recipient_email,
             recipient_name,
             email_type,
         }
     }
 
+    pub fn parse(email: String) -> Result<ValidEmail, ()> {
+        lazy_static! {
+            static ref USER_EMAIL: Regex = Regex::new(r#"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})"#).unwrap();
+        }
+
+        if USER_EMAIL.is_match(&email).unwrap() {
+            return Ok(ValidEmail(email))
+        }
+
+        Err(())
+    }
+
     pub fn send_email(self, mail: &EmailSettings) {
         // maybe just use Postfix
         let EmailSettings { smtp_user, smtp_pass, smtp_server } = mail;
-        let mut person_name = self.recipient_email.clone();
+        let mut person_name = self.recipient_email.clone().to_string();
 
         if let Some(name) = self.recipient_name {
             person_name = name;

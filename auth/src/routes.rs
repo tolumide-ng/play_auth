@@ -10,7 +10,7 @@ use crate::settings::database::DbSettings;
 pub async fn build (config: Settings) -> Rocket<Build>{
     let db_pool = get_pool(&config.db);
 
-    println!("{{{{{{{{|||||||||||||||||| {:#?}", config);
+    // println!("{{{{{{{{|||||||||||||||||| {:#?}", config);
 
     rocket::build()
         .attach(config.clone())

@@ -6,7 +6,7 @@ pub struct Transport;
 use lettre::{transport::smtp::authentication::Credentials, Message};
 
 impl SmtpTransport {
-    pub fn relay(relay: &str) -> Result<SmtpTransportBuilder, ()> {
+    pub fn relay(_relay: &str) -> Result<SmtpTransportBuilder, ()> {
         Ok(SmtpTransportBuilder)
     }
 
