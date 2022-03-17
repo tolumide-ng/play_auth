@@ -4,25 +4,25 @@ use serde::{Serialize};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct ApiSuccess<T: Serialize> {
-    pub code: u16,
+    pub status: u16,
     pub body: Option<T>,
     pub message: &'static str,
 }
 
 impl<T> ApiSuccess<T> where T: Serialize {
-    pub fn reply(message: &'static str, body: Option<T>, code: u16) -> Json<Self> {
-        Json(Self { message, body, code })
+    pub fn reply(message: &'static str, body: Option<T>, status: u16) -> Json<Self> {
+        Json(Self { message, body, status })
     }
 
     pub fn reply_success(body: Option<T>) -> Json<Self> {
         Json(Self{
-            code: 200, message: "Success", body
+            status: 200, message: "Success", body
         })
     }
 
-    pub fn reply_error(body: Option<T>, code: u16) -> Json<ApiSuccess<T>> {
+    pub fn reply_error(body: Option<T>, status: u16) -> Json<ApiSuccess<T>> {
         Json(ApiSuccess {
-            message: "Error", code, body,
+            message: "Error", status, body,
         })
     }
 
@@ -52,7 +52,7 @@ impl<T> ApiSuccess<T> where T: Serialize {
 //         let d = StatusCode::OK;
 
 //         let response = Response::build_from(Json(success_response).respond_to(request)?)
-//             .status(Status {code: 200})
+//             .status(Status {status: 200})
 //             .finalize();
 
 //         Ok(response)

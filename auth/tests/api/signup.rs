@@ -1,24 +1,13 @@
-use auth::helpers::auth::Password;
-use auth::routes::build;
-use auth::settings::config;
 use fake::Dummy;
 use rand::Rng;
 use rocket::http::{ContentType, Status};
 use rand::seq::SliceRandom;
-use rocket::tokio::io::AsyncReadExt;
-use rocket::launch;
 
 // #[launch]
-// pub async fn speak() -> _ {
+// pub async fn rocket() -> _ {
 //     let config = config::get_configuration().unwrap();
 //     build(config).await
 // }
-
-#[launch]
-pub async fn rocket() -> _ {
-    let config = config::get_configuration().unwrap();
-    build(config).await
-}
 
 const CREATE: &'static str = "/api/v1/create";
 
@@ -37,22 +26,11 @@ impl Dummy<Pwd> for &'static str {
 #[cfg(test)]
 mod test {
     use fake::Fake;
-    // use mockall::*;
     use mockall::predicate::*;
-    use serde::Deserialize;
-    use serde_json::Value;
 
     use super::*;
-    use crate::helpers::app::{get_client};
-
-
-    #[derive(serde::Deserialize, Debug)]
-    struct SuccessResponse {
-        code: i32,
-        body: String,
-        message: String,
-    }
-
+    use crate::helpers::app::{get_client, parse_api_response};
+    use crate::helpers::app::ResponseType;
 
 
     #[rocket::async_test]
@@ -63,16 +41,32 @@ mod test {
         assert_ne!(&response.content_type().unwrap(), &ContentType::JSON);
     }
 
-    // #[rocket::async_test]
-    // async fn test_does_not_provide_password() {
-    //     let client = get_client().await;
-    //     let response = client.post(CREATE)
-    //         .header(ContentType::JSON)
-    //         .body(r#"{ "email": "sample@email.com", password: "APass9065#*" }"#).dispatch().await;
+    #[rocket::async_test]
+    async fn test_does_not_provide_password() {
+        let client = get_client().await;
+        let email: String = fake::faker::internet::en::SafeEmail().fake();
+        let req_body = serde_json::json!({
+            "email": email,
+            "password": "good_pwd",
+        }).to_string();
 
-    //     println!("THE RESPONSE {:#?}", response.into_string().await.unwrap());
-    //     assert_eq!(1, 2)
-    // }
+        let response = client.post(CREATE)
+            .header(ContentType::JSON)
+            .body(req_body).dispatch().await;
+
+        assert_eq!(&response.status(), &Status::BadRequest);
+        assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
+
+        if let Err(res) = parse_api_response(response, ResponseType::Error).await {
+            let body = res.error;
+
+            assert_eq!(body.status, 400);
+            assert!(body.body.contains("Password must be atleast 8 characters long"));
+            assert_eq!(body.message, "Bad Request".to_string());
+        } else {
+            assert!(false);
+        }
+    }
 
     #[rocket::async_test]
     async fn test_crates_valid_user() {
@@ -80,7 +74,6 @@ mod test {
         let client = get_client().await;
         let email: String = fake::faker::internet::en::SafeEmail().fake();
         let good_pwd: &str = Pwd.fake();
-        // let req_body = format!(r#"{{"email": {}; "password": {}}}"#, email, good_pwd);
         let req_body = serde_json::json!({
             "email": email,
             "password": good_pwd,
@@ -92,18 +85,14 @@ mod test {
             .header(ContentType::JSON)
             .body(req_body).dispatch().await;
 
-        // println!(":::::::::::: RESPONSE.>>>>>>>>>>>>>>>>>>> {:#?}", response.into_string().await.unwrap());
         assert_eq!(&response.status(), &Status::Ok);
         assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
-        // let res = response.into_json::<SuccessResponse>().await;
-        let res = response.into_bytes().await.unwrap();
-        let bres: Value = serde_json::from_slice(&res).unwrap();
-        let body: SuccessResponse = serde_json::from_value(bres).unwrap();
-
-        assert_eq!(body.code, 200);
-        assert!(body.body.contains("check your email"));
-        assert_eq!(body.message, "Success".to_string());
+        if let Ok(body) = parse_api_response(response, ResponseType::Success).await {
+            assert_eq!(body.status, 200);
+            assert!(body.body.contains("check your email"));
+            assert_eq!(body.message, "Success".to_string());
+        } else {
+            assert!(false)
+        }
     }
-
-
 }
