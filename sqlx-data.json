@@ -21,18 +21,81 @@
     },
     "query": "SELECT email FROM play_user WHERE (email = $1) OR (username = $2)"
   },
-  "831e114c9ed25e6af20bf1c039fbe4485d26add0ac2bd03994ad484c6a500ec3": {
+  "948ac2109f34e35d9abe22b2242efa1d6c9040d65fe86d16e37b606b02ef0bfb": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "hash",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "email",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "username",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verified",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
       "parameters": {
         "Left": [
-          "Text",
-          "Varchar",
           "Text"
         ]
       }
     },
-    "query": "INSERT INTO play_user (email, username, hash) VALUES ($1, $2, $3)"
+    "query": "SELECT * FROM play_user WHERE (email = $1)"
+  },
+  "debf51724f7df6a911e709d6c2bcf95dc026296f799eada5949e492c1c440c09": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"
   }
 }

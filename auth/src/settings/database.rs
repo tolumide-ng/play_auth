@@ -1,37 +1,18 @@
+use serde::Deserialize;
 use sqlx::{postgres::{PgConnectOptions, PgSslMode}};
 
-use super::variables::{EnvVars, AppEnv};
-
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct DbSettings {
+    pub host: String,
+    pub port: u16,
     pub username: String,
     pub password: String,
-    pub port: u16,
-    pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
+    // pub db_url: String,
 }
 
 impl DbSettings {
-    pub fn new(vars: EnvVars) -> Self {
-        let mut require_ssl = true;
-
-        if [AppEnv::Local.to_string(), AppEnv::Test.to_string()].contains(&vars.app_env) {
-            require_ssl = false;
-        }
-
-        let EnvVars { db_host, db_port, db_username, db_password, db_name, .. } = vars;
-
-        Self {
-            username: db_username,
-            password: db_password,
-            port: db_port,
-            host: db_host,
-            database_name: db_name,
-            require_ssl,
-        }
-    }
-
     // for tests?
     pub fn without_db(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {

@@ -11,6 +11,9 @@ path = "src/lib.rs"
 name = "auth"
 path = "src/main.rs"
 
+[features]
+test = []
+
 [dependencies]
 serde = { version = "1.0.133", features = ["derive"] }
 serde-aux = "3.0.1"
@@ -29,8 +32,10 @@ fancy-regex = "0.8.0"
 lettre = { version = "0.10.0-rc.4", features = ["rustls-tls"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 jsonwebtoken = {version = "8", default-features = false }
-rocket_contrib = { version = "0.4.10", default-features = false, features = ["json"] }
-
+config = { version = "0.12.0", features = ["yaml"]}
+serde-with-expand-env = "1.0.0"
+shellexpand = "2.0.0"
+mockall_double = "0.1.0"
 
 [dependencies.rocket]
 version = "0.5.0-rc.1"
@@ -40,3 +45,5 @@ features = ["json"]
 [dev-dependencies]
 fake = "2.4"
 rand = "0.8"
+wiremock = "0.5"
+mockall = "0.11.0"

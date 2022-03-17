@@ -8,6 +8,7 @@ cargo sqlx prepare -- --lib // Update sqlx-data.json
 - [ ] - Forgot password 
 - [ ] - Reset Password
 - [ ] - Dispatch event on sign
+- [ ] - A macro to parse environment variables directly into structs
 
 
 Update sqlx-data.json from the base dir

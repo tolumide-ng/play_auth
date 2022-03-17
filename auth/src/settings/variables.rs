@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::env;
 
 
-#[derive(Debug, Clone, Deserialize, derive_more::Display)]
+#[derive(Debug, Clone, Deserialize, derive_more::Display, PartialEq)]
 pub enum AppEnv {
     #[display(fmt = "local")]
     Local,
@@ -16,6 +16,22 @@ pub enum AppEnv {
     Production
 }
 
+impl TryFrom<String> for AppEnv {
+    type Error = String;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        match s.to_lowercase().as_str() {
+            "production" => Ok(Self::Production),
+            "staging" => Ok(Self::Staging),
+            "test" => Ok(Self::Test),
+            "local" => Ok(Self::Local),
+            other => Err(format!(
+                "{} is not a supported app_env. Use either `local`|`test`|`staging`|`production`", other
+            ))
+        }
+    }
+}
+
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct EnvVars {
@@ -24,15 +40,17 @@ pub struct EnvVars {
     pub db_username: String,
     pub db_password: String,
     pub db_name: String,
-    pub app_env: String,
     pub db_url: String,
+
+    pub app_env: String,
     pub m_cost: u32,
     pub p_cost: u32,
     pub t_cost: u32,
+    pub jwt_secret: String,
+
     pub smtp_user: String,
     pub smtp_pass: String,
     pub smtp_server: String,
-    pub jwt_secret: String,
 }
 
 

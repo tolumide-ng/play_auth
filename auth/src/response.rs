@@ -1,67 +1,62 @@
-use std::io::Cursor;
-
-use rocket::{Error, serde::json::Json, response::{Responder, self}, Request, Response};
+use rocket::{serde::json::Json};
 use serde::{Serialize};
 
+
 #[derive(Debug, Serialize, Clone)]
-pub struct AppResponder<T: Serialize> {
-    code: u16,
-    body: Option<T>,
-    message: &'static str,
+pub struct ApiSuccess<T: Serialize> {
+    pub status: u16,
+    pub body: Option<T>,
+    pub message: &'static str,
 }
 
-impl<T> AppResponder<T> where T: Serialize {
-    pub fn reply(message: &'static str, body: Option<T>, code: u16) -> Json<Self> {
-        Json(Self { message, body, code })
+impl<T> ApiSuccess<T> where T: Serialize {
+    pub fn reply(message: &'static str, body: Option<T>, status: u16) -> Json<Self> {
+        Json(Self { message, body, status })
     }
 
     pub fn reply_success(body: Option<T>) -> Json<Self> {
         Json(Self{
-            code: 200, message: "Success", body
+            status: 200, message: "Success", body
         })
     }
 
-    pub fn reply_error(body: Option<T>, code: u16) -> Json<AppResponder<T>> {
-        Json(AppResponder {
-            message: "Error", code, body,
+    pub fn reply_error(body: Option<T>, status: u16) -> Json<ApiSuccess<T>> {
+        Json(ApiSuccess {
+            message: "Error", status, body,
         })
     }
 
 }
 
-
-#[derive(Debug, Responder)]
-#[response(bound = "T: Serialize", status = 404)]
-pub struct NotFoundError<T>(Json<T>);
-
-
-#[derive(Debug, Responder)]
-#[response(bound = "T: Serialize", status = 500)]
-pub struct InternalServerError<T>(Json<T>);
+// #[derive(Debug, Serialize, Deserialize)]
+// pub enum SuccessResponse<T> {
+//     #[serde(rename = "error")]
+//     Response {
+//         status: u16,
+//         message: &'static str,
+//         #[serde(skip_serializing_if = "Option::is_none")]
+//         body: Option<T>
+//     }
+// }
 
 
 
 // impl<'r, T> Responder<'r, 'static> for AppResponder<T> where T: Serialize {
-//     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-//         rocket_contrib::json::Json(self.clone()).respond_to(req)
+//     fn respond_to(self, request: &'r Request<'_>) -> response::Result<'static> {
+//         let success_response = SuccessResponse::Response {
+//             status: self.code,
+//             message: self.message,
+//             body: Some(self.body),
+//         };
+
+//         let d = StatusCode::OK;
+
+//         let response = Response::build_from(Json(success_response).respond_to(request)?)
+//             .status(Status {status: 200})
+//             .finalize();
+
+//         Ok(response)
 //     }
 // }
 
-// #[catch(404)]
-// pub fn not_found(req: &Request) -> AppResponder<&'static str> {
-//     AppResponder{
-//         code: 404,
-//         message: "Error",
-//         body: Some("Resource Not Found"),
-//     }
-//  }
 
-
-//  #[catch(500)]
-//  pub fn internal_server_error(req: &Request) -> AppResponder<&'static str> {
-//      AppResponder{
-//         code: 404,
-//         message: "Error",
-//         body: Some("Internal Server Error"),
-//     }
-//  }

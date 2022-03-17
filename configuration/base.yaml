@@ -1,0 +1,15 @@
+db:
+  host: localhost
+  port: 5432
+  username: tolumideshopein
+  password: password
+  database_name: play_auth
+  require_ssl: false
+app:
+  port: 8000
+  env: local
+  m_cost: 15000
+  p_cost: 1
+  t_cost: 2
+  jwt_secret: aSampleYUIJWTYIOLSNDKLSECZZRETdsjk9210921secret
+# email:

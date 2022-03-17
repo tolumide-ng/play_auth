@@ -15,4 +15,8 @@ run_auth:
 
 .PHONY: Update sqlx-data.json for the workspace
 update_migrations:
-	cargo sqlx prepare --merge
+	cargo sqlx prepare --merged
+
+.PHONY: Run all tests (adding the arguments --features "tests" allows all integration test features to be implemnted)
+test_all:
+	cargo test -p auth --features "test"

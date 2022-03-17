@@ -1,0 +1,15 @@
+db:
+  host: localhost
+  port: 5432
+  # port: 5432
+  username: tolumideshopein
+  password: password
+  database_name: play_auth
+  require_ssl: false
+# db:
+#   host: ${DB_LOCAL_HOST}
+#   port: 5432
+#   username: tolumideshopein
+#   password: password
+#   database_name: play_auth
+#   require_ssl: false

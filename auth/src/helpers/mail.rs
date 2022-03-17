@@ -1,9 +1,16 @@
+use fancy_regex::Regex;
+use lazy_static::lazy_static;
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport, Transport};
-use secrecy::{Secret, ExposeSecret};
+use lettre::{Message, Transport};
+use std::fmt;
 
-use crate::settings::variables::EnvVars;
 
+#[cfg(feature = "test")]
+use crate::stubs::email::SmtpTransport;
+#[cfg(not(feature = "test"))]
+use lettre::SmtpTransport;
+
+use crate::settings::email::EmailSettings;
 pub enum MailType {
     // signup or forgot_pwd key/jwt
     Signup(&'static str),
@@ -11,33 +18,60 @@ pub enum MailType {
 }
 
 pub struct Email {
-    recipient_email: String,
-    recipient_name: String,
+    recipient_email: ValidEmail,
+    recipient_name: Option<String>,
     email_type: MailType,
 }
 
+#[derive(Debug, Clone)]
+pub struct ValidEmail(String);
+
+impl std::fmt::Display for ValidEmail {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
 
 impl Email {
-    pub fn new(recipient_email: String, recipient_name: String, email_type: MailType) -> Self {
+    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType) -> Self {
         Self {
-            recipient_email, 
+            recipient_email,
             recipient_name,
             email_type,
         }
     }
 
-    pub fn send_email(self) {
+    pub fn parse(email: String) -> Result<ValidEmail, ()> {
+        lazy_static! {
+            static ref USER_EMAIL: Regex = Regex::new(r#"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})"#).unwrap();
+        }
+
+        if USER_EMAIL.is_match(&email).unwrap() {
+            return Ok(ValidEmail(email))
+        }
+
+        Err(())
+    }
+
+    pub fn send_email(self, mail: &EmailSettings) {
         // maybe just use Postfix
-        let EnvVars { smtp_user, smtp_pass, smtp_server, .. } = EnvVars::new();
+        let EmailSettings { smtp_user, smtp_pass, smtp_server } = mail;
+        let mut person_name = self.recipient_email.clone().to_string();
+
+        if let Some(name) = self.recipient_name {
+            person_name = name;
+        }
         let email = Message::builder()
             .from("Dire <noreply@gmail.com>".parse().unwrap())
-            .to(format!("{} <{}>", self.recipient_name, self.recipient_email).parse().unwrap())
+            .to(format!("{} <{}>", person_name, self.recipient_email).parse().unwrap())
             .subject("Welcome to the app with no name yet!")
             // use html file styled with css in this case
             .body(String::from(r#"Thank you for signing up with us :wink, please 
             activate your account by clicking the link: <>whatever the links<>"#)).unwrap();
 
-        let creds = Credentials::new(smtp_user, smtp_pass);
+        let creds = Credentials::new(smtp_user.clone(), smtp_pass.clone());
 
         let mailer = SmtpTransport::relay(&smtp_server)
             .unwrap().credentials(creds).build();
