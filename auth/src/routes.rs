@@ -3,7 +3,9 @@ use std::time::Duration;
 use rocket::{Rocket, Build};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
-use crate::controllers::{ create, health, user_login, forgot };
+use crate::controllers::{ create, health, user_login, forgot,
+    verify,
+};
 use crate::settings::config::Settings;
 use crate::settings::database::DbSettings;
 
@@ -20,7 +22,7 @@ pub async fn build (config: Settings) -> Rocket<Build>{
         .manage(redis_client)
         .manage(config)
         .mount("/api/v1", routes![
-            health,  create, user_login, forgot,
+            health,  create, user_login, forgot, verify,
         ])
         // .register(catchers![not_found])
 }

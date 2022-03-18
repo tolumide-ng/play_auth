@@ -23,26 +23,21 @@ pub trait Jwt where Self: Serialize + DeserializeOwned {
     }
 }
 
-// on Login/ForgotPassword, we can send users this token again with the error message on their screen
-// to activate their account (an email has just been sent to them), always keep record
-// of the last time the verification email was sent, only send a new one after 20 
-// minutes (expiry of the old verification token) - Use redis timed delete (expires and deletes after a particular time)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignupJwt {
-    // we won't be saving the jwt on redis, only save the signup_id mapped to the user_id on redis
-    signup_id: Uuid,
+    user_id: Uuid,
     exp: usize,
     iat: usize,
     subj: String, // do we really need this?
 }
 
 impl SignupJwt {
-    pub fn new(signup_id: Uuid) -> Self {
+    pub fn new(user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         // INFORM THE USER THAT SIGNUP TOKEN EXPIRES AFTER ONE HOUR
         let exp = SystemTime::now().checked_add(Duration::from_secs(7200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
 
-        Self { signup_id, iat, exp, subj: "Signup".to_string(), }
+        Self { user_id, iat, exp, subj: "Signup".to_string(), }
     }
 }
 
@@ -52,7 +47,7 @@ impl Jwt for SignupJwt {}
 // persist on redis ??
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ForgotPasswordJwt {
-    forgot_id: Uuid, // unique id generated when a user requests for password change, this should be persisted
+    user_id: Uuid, // unique id generated when a user requests for password change, this should be persisted
     exp: usize,
     iat: usize,
     subj: String,
@@ -61,10 +56,10 @@ pub struct ForgotPasswordJwt {
 impl Jwt for ForgotPasswordJwt {}
 
 impl ForgotPasswordJwt {
-    pub fn new(forgot_id: Uuid) -> Self {
+    pub fn new(user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         let exp = SystemTime::now().checked_add(Duration::from_secs(1200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        Self { forgot_id, exp, iat, subj: "Forgot".to_string(), }
+        Self { user_id, exp, iat, subj: "Forgot".to_string(), }
     }
 }
 
@@ -111,25 +106,25 @@ mod test_jwt {
 
     #[test]
     fn generated_forgot_token_can_be_decoded() {
-        let forgot_uuid: Uuid = Uuid::new_v4();
+        let user_id: Uuid = Uuid::new_v4();
         let envs = get_appsettings();
 
-        let encoded_token = ForgotPasswordJwt::new(forgot_uuid).encode(&envs).unwrap();
+        let encoded_token = ForgotPasswordJwt::new(user_id).encode(&envs).unwrap();
         let decoded_token: Result<TokenData<ForgotPasswordJwt>, _> = ForgotPasswordJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
         let token = decoded_token.unwrap();
         assert_eq!(token.claims.subj, "Forgot".to_string());
-        assert_eq!(token.claims.forgot_id, forgot_uuid);
+        assert_eq!(token.claims.user_id, user_id);
     }
 
     #[test]
     fn forgot_token_expires_after_two_hours() {
-        let forgot_uuid: Uuid = Uuid::new_v4();
+        let user_id: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
         let envs = get_appsettings();
 
-        let encoded_token = ForgotPasswordJwt::new(forgot_uuid).encode(&envs).unwrap();
+        let encoded_token = ForgotPasswordJwt::new(user_id).encode(&envs).unwrap();
         let decoded_token: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
@@ -181,17 +176,17 @@ mod test_jwt {
 
     #[test]
     fn generates_token_on_signup() {
-        let signup_id: Uuid = Uuid::new_v4();
-        let token = SignupJwt::new(signup_id).encode(&get_appsettings());
+        let user_id: Uuid = Uuid::new_v4();
+        let token = SignupJwt::new(user_id).encode(&get_appsettings());
         assert!(token.is_ok());
     }
 
     #[test]
     fn generated_signup_token_can_be_decoded() {
-        let signup_id: Uuid = Uuid::new_v4();
+        let user_id: Uuid = Uuid::new_v4();
         let envs = get_appsettings();
 
-        let encoded_token = SignupJwt::new(signup_id).encode(&envs).unwrap();
+        let encoded_token = SignupJwt::new(user_id).encode(&envs).unwrap();
         let decoded_token: Result<TokenData<SignupJwt>, _> = SignupJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
@@ -200,11 +195,11 @@ mod test_jwt {
 
     #[test]
     fn signup_token_expires_after_two_hours() {
-        let signup_id: Uuid = Uuid::new_v4();
+        let user_id: Uuid = Uuid::new_v4();
         const TWO_HOURS: usize = 7200000; // Equivalent of two hours in ms
         let envs = get_appsettings();
 
-        let encoded_token = SignupJwt::new(signup_id).encode(&envs).unwrap();
+        let encoded_token = SignupJwt::new(user_id).encode(&envs).unwrap();
         let decoded_token: TokenData<SignupJwt> = SignupJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
