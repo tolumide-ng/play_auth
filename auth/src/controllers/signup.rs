@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 use dotenv::dotenv;
 
-use crate::{base_repository::user::DbUser, helpers::{mail::{Email, MailType}, auth::{Password}, commons::{Str, ApiResult}}, response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
+use crate::base_repository::user::DbUser;
+use crate::helpers::{mail::{Email, MailType}, pwd::{Password}, commons::{Str, ApiResult}};
+use crate::{response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
 
 #[derive(Deserialize, Serialize)]

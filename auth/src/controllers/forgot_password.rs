@@ -1,3 +1,4 @@
+use redis::RedisError;
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
@@ -22,16 +23,16 @@ pub async fn forgot(
     let parsed_email = Email::parse(email);
 
     if parsed_email.is_err() {
-        return Err(ApiError::BadRequest("Please provide a valid email address"))
+        return Err(ApiError::BadRequest("Please check your email for the link to reset your password"))
     }
     
     let valid_email = parsed_email.unwrap();
     let user = DbUser::email_exists(pool, &valid_email).await?;
     
-    // if user.is_none() {
-    //     // Avoid telling the user whether the email exists or not (Security)
-    //     return Ok(ApiSuccess::reply_success(Some("Please check your email to reset your password")))
-    // }
+    if user.is_none() {
+        // Avoid telling the user whether the email exists or not (Security)
+        return Ok(ApiSuccess::reply_success(Some("Please check your email to reset your password")))
+    }
 
     let mut redis_conn = redis.get_async_connection().await?;
 
@@ -44,7 +45,16 @@ pub async fn forgot(
     println!("value of avc {:#?}", avc);
     // remember to set an expiry for every key
 
-    let forgot_pwd_exists = redis::cmd("GET").arg(&[key]).query_async(&mut redis_conn).await?;
+    let forgot_pwd_exists: Result<String, RedisError> = redis::cmd("GET").arg(&[key]).query_async(&mut redis_conn).await;
+
+    if forgot_pwd_exists.is_ok() {
+        // this user has requested for a password changed in the last one
+        return Ok(ApiSuccess::reply_success(Some("Please check your email for the link to reset your password")))
+    }
+
+    // At this point, we haven't sent the user a new password in the last 1 hour, and the user exists
+
+    // let forgot_pwd_exists: String = redis::cmd("GET").arg(&[key]).query_async(&mut redis_conn).await.unwrap();
     // there's something wrong with this get request investigate it!!
 
     println!("TH VALE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>U {:#?}", forgot_pwd_exists);

@@ -4,7 +4,12 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
-use crate::{helpers::{commons::{ApiResult}, auth::{Password, LoginJwt, Jwt}, mail::Email}, response::ApiSuccess, base_repository::user::DbUser, errors::app::ApiError, settings::{config::Settings}};
+use crate::helpers::jwt::{LoginJwt, Jwt};
+use crate::response::ApiSuccess;
+use crate::base_repository::user::DbUser;
+use crate::errors::app::ApiError;
+use crate:: settings::{config::Settings};
+use crate::helpers::{commons::{ApiResult}, pwd::Password, mail::Email};
 
 
 #[derive(Deserialize, Serialize)]
@@ -35,8 +40,8 @@ pub async fn user_login(
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
             if db_user.is_verified() {
-                let info = db_user.get_user();
-                let login_jwt = LoginJwt::new(info.0, info.1).encode(&state.app)?;
+                let info: (String, uuid::Uuid) = db_user.get_user();
+                let login_jwt = LoginJwt::new(valid_email, info.1).encode(&state.app)?;
                 let mut body = HashMap::new();
                 body.insert("jwt", login_jwt);
                 return Ok(ApiSuccess::reply_success(Some(body)))
