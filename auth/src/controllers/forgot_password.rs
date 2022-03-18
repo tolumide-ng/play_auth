@@ -35,10 +35,10 @@ pub async fn forgot(
         return Ok(ApiSuccess::reply_success(Some("Please check your email for the link to reset your password".to_string())))
     }
 
-    let the_user = user.unwrap();
+    let the_user = user.unwrap().get_user().1;
     let mut redis_conn = redis.get_async_connection().await?;
     
-    let key = forgot_password_key(the_user.user_id);
+    let key = forgot_password_key(the_user);
 
     let forgot_pwd_exists: Result<String, RedisError> = redis_conn.get(&key).await;
     if forgot_pwd_exists.is_ok() {
@@ -47,7 +47,7 @@ pub async fn forgot(
     }
 
     // At this point, we haven't sent the user a new password in the last 1 hour, and the user exists
-    let jwt = ForgotPasswordJwt::new(the_user.user_id).encode(&state.app)?;
+    let jwt = ForgotPasswordJwt::new(the_user).encode(&state.app)?;
     redis_conn.set(&key, &jwt).await?;
     redis_conn.expire(&key, EXPIRE_AT).await?;
 

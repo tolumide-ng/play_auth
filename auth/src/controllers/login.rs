@@ -37,18 +37,17 @@ pub async fn user_login(
 
     let user = DbUser::email_exists(pool, &valid_email).await?;
 
+
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
-            if db_user.is_verified() {
-                let info: (String, uuid::Uuid) = db_user.get_user();
-                let login_jwt = LoginJwt::new(valid_email, info.1).encode(&state.app)?;
-                let mut body = HashMap::new();
-                body.insert("jwt", login_jwt);
-                return Ok(ApiSuccess::reply_success(Some(body)))
-            }
-            return Err(ApiError::UnverifiedAccount)
+            let info: (String, uuid::Uuid) = db_user.get_user();
+            let login_jwt = LoginJwt::new(valid_email, info.1, db_user.is_verified()).encode(&state.app)?;
+            let mut body = HashMap::new();
+            body.insert("jwt", login_jwt);
+            body.insert("verified", db_user.is_verified().to_string());
+            return Ok(ApiSuccess::reply_success(Some(body)))
         }
-
     }
+
     return Err(ApiError::AuthenticationError("Email or Password does not match"))
 }

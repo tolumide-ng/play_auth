@@ -36,7 +36,7 @@ pub enum ApiError {
     ValidationError(&'static str),
     #[error("{0}")]
     Conflict(&'static str),
-    #[error("0")]
+    #[error("{0}")]
     AuthenticationError(&'static str),
     #[error("Authorization Error")]
     AuthorizationError(&'static str),

@@ -73,16 +73,17 @@ impl ForgotPasswordJwt {
 pub struct LoginJwt {
     email: String,
     user_id: Uuid,
+    verified: bool,
     exp: usize,
     iat: usize,
     subj: String,
 }
 
 impl LoginJwt {
-    pub fn new(email: ValidEmail, user_id: Uuid) -> Self {
+    pub fn new(email: ValidEmail, user_id: Uuid, verified: bool) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         let exp = SystemTime::now().checked_add(Duration::from_secs(1200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id }
+        Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id, verified }
     }
 }
 
@@ -143,7 +144,7 @@ mod test_jwt {
         let envs = get_appsettings();
         let email = get_email();
 
-        let token = LoginJwt::new(email, login_uuid).encode(&envs);
+        let token = LoginJwt::new(email, login_uuid, true).encode(&envs);
         assert!(token.is_ok());
     }
 
@@ -154,7 +155,7 @@ mod test_jwt {
         let envs = get_appsettings();
         let email = get_email();
 
-        let encoded_token = LoginJwt::new(email.clone(), login_uuid).encode(&envs).unwrap();
+        let encoded_token = LoginJwt::new(email.clone(), login_uuid, true).encode(&envs).unwrap();
         let decoded_token: Result<TokenData<LoginJwt>, _> = LoginJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
@@ -170,7 +171,7 @@ mod test_jwt {
         let envs = get_appsettings();
         let email = get_email();
 
-        let encoded_token = LoginJwt::new(email, login_uuid).encode(&envs).unwrap();
+        let encoded_token = LoginJwt::new(email, login_uuid, false).encode(&envs).unwrap();
         let decoded_token: TokenData<LoginJwt> = LoginJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;

@@ -16,7 +16,6 @@ pub struct User {
 
 
 // todo!() only dispatch an event into the queue when a user has been verified on the verify endpoint
-
 #[post("/create", data = "<user>")]
 pub async fn create(
     user: Json<User>, 
