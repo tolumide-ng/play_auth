@@ -11,13 +11,13 @@ pub struct DbUser;
 
 #[derive(Debug)]
 pub struct User {
-    user_id: Uuid,
+    pub user_id: Uuid,
     hash: String,
-    email: String,
+    pub email: String,
     verified: bool,
-    username: Option<String>,
-    created_at: chrono::NaiveDateTime,
-    updated_at: chrono::NaiveDateTime,
+    pub username: Option<String>,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
 }
 
 impl User {
