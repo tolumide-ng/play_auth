@@ -181,6 +181,10 @@ version = "0.1.0"
 [[package]]
 name = "auth_macro_derive"
 version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "autocfg"
