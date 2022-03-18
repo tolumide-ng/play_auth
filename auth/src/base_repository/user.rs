@@ -37,7 +37,7 @@ impl User {
 
 
 impl DbUser {
-    pub async fn user_exist(pool: &Pool<Postgres>, email: ValidEmail, username: String) -> DbResult<bool> {
+    pub async fn user_exist(pool: &Pool<Postgres>, email: &ValidEmail, username: String) -> DbResult<bool> {
         let user = sqlx::query!(r#"SELECT email FROM play_user WHERE (email = $1) OR (username = $2)"#, email.to_string(), username)
             .fetch_optional(pool)
             .await;
@@ -51,7 +51,7 @@ impl DbUser {
         }
     }
 
-    pub async fn create_user(pool: &Pool<Postgres>, email: ValidEmail, hash: String) -> DbResult<bool> {
+    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: String) -> DbResult<bool> {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
             .fetch_one(pool).await;
 
@@ -63,7 +63,7 @@ impl DbUser {
         return Ok(true);
     }
 
-    pub async fn email_exists(pool: &Pool<Postgres>, email: ValidEmail) -> DbResult<Option<User>> {
+    pub async fn email_exists(pool: &Pool<Postgres>, email: &ValidEmail) -> DbResult<Option<User>> {
         use dotenv::dotenv;
         dotenv().ok();
         let res = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#, email.to_string())

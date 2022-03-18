@@ -6,6 +6,7 @@ use rocket::{
     serde::json::Json,
     Request, Response,
 };
+use redis::RedisError;
 use serde::{Deserialize, Serialize};
 use argon2::Error as PError;
 // use argon2::password_hash::Error;
@@ -25,7 +26,7 @@ pub enum ErrorResponse {
 
 #[derive(Debug, Error)]
 pub enum ApiError {
-    #[error("Database Error")]
+    #[error("Internal Server Error")]
     DatabaseError(#[from] sqlx::Error),
     #[error("Jwt Error {0}")]
     JwtError(#[from] JwtError),
@@ -41,6 +42,8 @@ pub enum ApiError {
     AuthorizationError(&'static str),
     #[error("Internal Server Error")]
     PasswordError(#[from] PError),
+    #[error("Internal Server Error")]
+    RedisError(#[from] RedisError),
     #[error("Please verify your account by clicking the email sent on signup")]
     UnverifiedAccount,
     
@@ -55,7 +58,7 @@ impl ApiError {
 
         match self {
             ValidationError(_) | BadRequest(_) => Status::BadRequest,
-            DatabaseError(_) | PasswordError(_) => Status::InternalServerError,
+            DatabaseError(_) | PasswordError(_) | RedisError(_) => Status::InternalServerError,
             JwtError(_) | AuthenticationError(_) => Status::Unauthorized,
             Conflict(_) => Status::Conflict,
             AuthorizationError(_) | UnverifiedAccount => Status::Forbidden,

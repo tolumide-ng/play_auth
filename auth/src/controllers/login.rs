@@ -30,7 +30,7 @@ pub async fn user_login(
 
     let valid_email = parsed_email.unwrap();
 
-    let user = DbUser::email_exists(pool, valid_email).await?;
+    let user = DbUser::email_exists(pool, &valid_email).await?;
 
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {

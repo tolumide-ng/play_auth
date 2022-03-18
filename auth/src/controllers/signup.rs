@@ -39,10 +39,10 @@ pub async fn create(
     let valid_email = parsed_email.unwrap();
     let valid_pwd = parsed_pwd.unwrap();
 
-    let user_already_exists = DbUser::email_exists(pool, valid_email.clone()).await?;
+    let user_already_exists = DbUser::email_exists(pool, &valid_email).await?;
 
     if user_already_exists.is_none() {
-        let _user = DbUser::create_user(pool, valid_email.clone(), valid_pwd.get_val()).await?;
+        let _user = DbUser::create_user(pool, &valid_email, valid_pwd.get_val()).await?;
         // generate jwt that would be sent to the user's email for verification
         // SignupJwt::new()
         Email::new(valid_email, None, MailType::Signup("")).send_email(&envs.email);
