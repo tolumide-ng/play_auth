@@ -1,5 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH, Duration};
 
+use auth_macro_derive::JwtHelper;
+use auth_macro::jwt::JwtHelper;
 use jsonwebtoken::{encode, EncodingKey, Header, decode, DecodingKey, Validation, TokenData};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
@@ -23,7 +25,7 @@ pub trait Jwt where Self: Serialize + DeserializeOwned {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JwtHelper)]
 pub struct SignupJwt {
     user_id: Uuid,
     exp: usize,
@@ -45,7 +47,7 @@ impl Jwt for SignupJwt {}
 
 
 // persist on redis ??
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JwtHelper)]
 pub struct ForgotPasswordJwt {
     user_id: Uuid, // unique id generated when a user requests for password change, this should be persisted
     exp: usize,
@@ -64,7 +66,7 @@ impl ForgotPasswordJwt {
 }
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, JwtHelper)]
 pub struct LoginJwt {
     email: String,
     user_id: Uuid,

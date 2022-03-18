@@ -3,7 +3,7 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{mail::Email, commons::{ApiResult, forgot_password_key}, jwt::{ForgotPasswordJwt, Jwt}}, errors::app::ApiError, base_repository::user::DbUser, response::ApiSuccess};
+use crate::{settings::config::Settings, helpers::{mail::Email, commons::{ApiResult, make_redis_key}, jwt::{ForgotPasswordJwt, Jwt}}, errors::app::ApiError, base_repository::user::DbUser, response::ApiSuccess};
 
 const EXPIRE_AT: usize = 3600;
 
@@ -38,7 +38,7 @@ pub async fn forgot(
     let the_user = user.unwrap().get_user().1;
     let mut redis_conn = redis.get_async_connection().await?;
     
-    let key = forgot_password_key(the_user);
+    let key = make_redis_key("forgot", the_user);
 
     let forgot_pwd_exists: Result<String, RedisError> = redis_conn.get(&key).await;
     if forgot_pwd_exists.is_ok() {

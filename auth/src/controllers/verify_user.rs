@@ -1,3 +1,4 @@
+use auth_macro::jwt::JwtHelper;
 use jsonwebtoken::TokenData;
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
@@ -24,8 +25,7 @@ pub async fn verify(
 
     match user_token {
         Ok(token) => {
-            // let mut claims = token.claims.user_id;
-            // token.claims.user_id = uuid::Uuid::new_v4();
+            let user_id = token.claims.get_user();
             
             Err(ApiError::BadRequest("Token is either expired or does not exist"))
         },

@@ -148,6 +148,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "argon2",
+ "auth_macro",
+ "auth_macro_derive",
  "config",
  "derive_more",
  "dotenv",
@@ -177,6 +179,9 @@ dependencies = [
 [[package]]
 name = "auth_macro"
 version = "0.1.0"
+dependencies = [
+ "uuid",
+]
 
 [[package]]
 name = "auth_macro_derive"
@@ -184,6 +189,7 @@ version = "0.1.0"
 dependencies = [
  "quote",
  "syn",
+ "uuid",
 ]
 
 [[package]]

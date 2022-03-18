@@ -51,16 +51,20 @@ impl DbUser {
         }
     }
 
-    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: String) -> DbResult<bool> {
+    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: String) -> DbResult<Uuid> {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
             .fetch_one(pool).await;
+
+        println!("WHAT THE RECORD LOOKS LIKE {:#?}", user);
 
         if let Err(e) = user {
             // todo!() - tracing!
             return Err(ApiError::DatabaseError(e))
         }
 
-        return Ok(true);
+        let user_id = user.unwrap().user_id;
+
+        Ok(user_id)
     }
 
     pub async fn email_exists(pool: &Pool<Postgres>, email: &ValidEmail) -> DbResult<Option<User>> {
