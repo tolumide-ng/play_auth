@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use argon2::{
     password_hash::{
         rand_core::OsRng, 
@@ -11,8 +13,9 @@ use fancy_regex::Regex;
 
 use crate::{settings::{app::AppSettings}, errors::app::ApiError};
 
+#[derive(derive_more::Display, Debug)]
+pub struct Password(#[display(fmt = "{0}")]String);
 
-pub struct Password(String);
 
 impl Password {
     pub fn new(pwd: String, app: &AppSettings) -> Result<Self, ApiError> {
@@ -45,9 +48,6 @@ impl Password {
         RE.is_match(pwd).unwrap()
     }
 
-    pub fn get_val(self) -> String {
-        self.0
-    }
 
     pub fn is_same(hash: String, password: String) -> bool {
         let parsed_hash = PasswordHash::new(&hash).unwrap();

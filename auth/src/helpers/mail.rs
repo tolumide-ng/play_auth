@@ -26,15 +26,8 @@ pub struct Email {
     content: Option<String>,
 }
 
-#[derive(Debug, Clone)]
-pub struct ValidEmail(String);
-
-impl std::fmt::Display for ValidEmail {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
+#[derive(Debug, Clone, derive_more::Display)]
+pub struct ValidEmail(#[display(fmt = "{0}")]String);
 
 
 impl Email {

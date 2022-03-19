@@ -1,8 +1,11 @@
+use auth_macro::jwt::JwtHelper;
+use jsonwebtoken::TokenData;
 use rocket::{serde::json::Json, State};
+use redis::{RedisError, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{commons::ApiResult, mail::Email, pwd::Password}, response::ApiSuccess};
+use crate::{settings::config::Settings, helpers::{commons::{ApiResult, make_redis_key}, mail::Email, pwd::Password, jwt::{ForgotPasswordJwt, Jwt}}, response::ApiSuccess, base_repository::user::DbUser, errors::app::ApiError};
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
@@ -20,11 +23,27 @@ pub async fn reset(
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     let User {email, password, token} = user.0;
 
-    let mut resis_conn = redis.get_async_connection().await?;
-    
+    let token: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&token, &state.app)?;
 
-    let parsed_email = Email::parse(email)?;
-    let parsed_password = Password::new(password, &state.app)?;
+    let mut redis_conn = redis.get_async_connection().await?;
+    let user_id = token.claims.get_user();
 
-    Ok(ApiSuccess::reply_success(None))
+    let key = make_redis_key("forgot", user_id);
+    let key_exists: Option<String> = redis_conn.get(&key).await?;
+
+    if key_exists.is_some() {
+        let parsed_email = Email::parse(email)?;
+        let parsed_password = Password::new(password, &state.app)?;
+
+        DbUser::update_pwd(pool, parsed_password, parsed_email).await?;
+        // delete the forgot jwt token for this user
+        redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
+        // delete all current login_jwts for this user
+        let login_key = format!("{}:*", make_redis_key("login", user_id));
+        redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
+
+        return Ok(ApiSuccess::reply_success(Some("password reset successful")));
+    }
+
+    Err(ApiError::AuthorizationError("Token is either expired or invalid"))
 }

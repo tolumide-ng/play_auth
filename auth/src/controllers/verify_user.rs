@@ -29,9 +29,9 @@ pub async fn verify(
 
     let key = make_redis_key("signup", user_id);
     // does this signup token exist?
-    let key_exists: Result<Option<String>, RedisError> = redis_conn.get(&key).await;
+    let key_exists: Option<String> = redis_conn.get(&key).await?;
 
-    if key_exists.is_ok() && key_exists.unwrap().is_some() {
+    if key_exists.is_some() {
         DbUser::verify_user(pool, user_id).await?;
 
         redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
@@ -41,5 +41,5 @@ pub async fn verify(
         return Ok(ApiSuccess::reply_success(Some("verified")));
     }
 
-    return Err(ApiError::AuthenticationError("Token is either expired or does not exist"))
+    return Err(ApiError::AuthenticationError("Token is either expired or invalid"))
 }
