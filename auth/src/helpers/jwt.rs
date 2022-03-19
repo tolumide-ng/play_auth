@@ -44,7 +44,7 @@ impl SignupJwt {
     pub fn new(user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         // INFORM THE USER THAT SIGNUP TOKEN EXPIRES AFTER TWO HOURS
-        let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_120 as u64)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
+        let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_120)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
 
         Self { user_id, iat, exp, subj: "Signup".to_string(), }
     }

@@ -43,7 +43,7 @@ pub async fn forgot(
     // At this point, we haven't sent the user a new password in the last 1 hour, and the user exists
     let jwt = ForgotPasswordJwt::new(the_user).encode(&state.app)?;
     redis_conn.set(&key, &jwt).await?;
-    redis_conn.expire(&key, MINUTES_60).await?;
+    redis_conn.expire(&key, MINUTES_60 as usize).await?;
     println!("FORGOT PASSWORD KJWT {:#?}", jwt);
     // JWT SHOULD BE SENT TO THE EMAIL INSTEAD
     // Email::new(parsed_email, None, MailType::ForgotPassword(Uuid::new_v4()));

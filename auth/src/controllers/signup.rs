@@ -42,7 +42,7 @@ pub async fn create(
 
         let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
         redis_conn.set(&key, &jwt).await?;
-        redis_conn.expire(&key, MINUTES_120).await?;
+        redis_conn.expire(&key, MINUTES_120 as usize).await?;
 
         println!("the signup jwt {:#?}", jwt);
 

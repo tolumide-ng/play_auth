@@ -43,7 +43,7 @@ pub async fn reset(
             // delete the forgot jwt token for this user
             redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
             // delete all current login_jwts for this user
-            let login_key = format!("{}:*", RedisKey::new(RedisPrefix::Forgot, user_id).make_key());
+            let login_key = format!("{}:*", RedisKey::new(RedisPrefix::Login, user_id).make_key());
             redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
     
             return Ok(ApiSuccess::reply_success(Some("password reset successful")));

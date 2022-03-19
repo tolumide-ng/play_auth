@@ -1,9 +1,10 @@
+use redis::{AsyncCommands};
 use std::collections::HashMap;
-
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
+use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_20};
 use crate::helpers::jwt::{LoginJwt, Jwt};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;
@@ -36,13 +37,20 @@ pub async fn user_login(
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
             let info: (String, uuid::Uuid) = db_user.get_user();
-            let login_jwt = LoginJwt::new(parsed_email, info.1, db_user.is_verified()).encode(&state.app)?;
+            let user_id = info.1;
+            let jwt = LoginJwt::new(parsed_email, user_id, db_user.is_verified()).encode(&state.app)?;
 
             let mut redis_conn = redis.get_async_connection().await?;
-            // redis_conn.set
+            let key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
+            redis_conn.set(&key, &jwt).await?;
+            redis_conn.expire(&key, MINUTES_20 as usize).await?;
+
+            println!("{{{{{{{{{{{{ {:#?}", key);
+
+            println!("the key!!!!!!!!! {:#?}", jwt);
 
             let mut body = HashMap::new();
-            body.insert("jwt", login_jwt);
+            body.insert("jwt", jwt);
             body.insert("verified", db_user.is_verified().to_string());
             return Ok(ApiSuccess::reply_success(Some(body)))
         }

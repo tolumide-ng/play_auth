@@ -18,6 +18,8 @@ pub enum RedisPrefix {
     Login,
     #[display(fmt = "forgot")]
     Forgot,
+    #[display(fmt = "login")]
+    LoginWithoutTs,
 }
 
 pub struct RedisKey {
@@ -37,15 +39,15 @@ impl RedisKey {
 
         if self.prefix == RedisPrefix::Login {
             let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-            key = format!("{}:{}", key, time);
+            key = format!("{}__{}", key, time);
         }
 
         key
     }
 }
 
-pub const MINUTES_20: usize = 60 * 20;
-pub const MINUTES_60: usize = 60 * 60;
-pub const MINUTES_120: usize = 60 * 60 * 2;
+pub const MINUTES_20: u64 = 60 * 20;
+pub const MINUTES_60: u64 = 60 * 60;
+pub const MINUTES_120: u64 = 60 * 60 * 2;
 
 // pub fn get_user_from_redis_key(key: String) {}
