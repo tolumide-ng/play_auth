@@ -17,10 +17,12 @@ pub enum MailType {
     ForgotPassword(&'static str),
 }
 
+// CONVERT THIS EMAIL STRUCT INTO A TRAIT OBJECT
 pub struct Email {
     recipient_email: ValidEmail,
     recipient_name: Option<String>,
     email_type: MailType,
+    content: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -35,11 +37,12 @@ impl std::fmt::Display for ValidEmail {
 
 
 impl Email {
-    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType) -> Self {
+    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType, content: Option<String>) -> Self {
         Self {
             recipient_email,
             recipient_name,
             email_type,
+            content,
         }
     }
 

@@ -37,7 +37,7 @@ impl User {
 
 
 impl DbUser {
-    pub async fn user_exist(pool: &Pool<Postgres>, email: ValidEmail, username: String) -> DbResult<bool> {
+    pub async fn user_exist(pool: &Pool<Postgres>, email: &ValidEmail, username: String) -> DbResult<bool> {
         let user = sqlx::query!(r#"SELECT email FROM play_user WHERE (email = $1) OR (username = $2)"#, email.to_string(), username)
             .fetch_optional(pool)
             .await;
@@ -51,21 +51,23 @@ impl DbUser {
         }
     }
 
-    pub async fn create_user(pool: &Pool<Postgres>, email: ValidEmail, hash: String) -> DbResult<bool> {
+    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: String) -> DbResult<Uuid> {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
             .fetch_one(pool).await;
+
+        println!("WHAT THE RECORD LOOKS LIKE {:#?}", user);
 
         if let Err(e) = user {
             // todo!() - tracing!
             return Err(ApiError::DatabaseError(e))
         }
 
-        return Ok(true);
+        let user_id = user.unwrap().user_id;
+
+        Ok(user_id)
     }
 
-    pub async fn email_exists(pool: &Pool<Postgres>, email: ValidEmail) -> DbResult<Option<User>> {
-        use dotenv::dotenv;
-        dotenv().ok();
+    pub async fn email_exists(pool: &Pool<Postgres>, email: &ValidEmail) -> DbResult<Option<User>> {
         let res = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#, email.to_string())
             .fetch_one(pool)
             .await;
@@ -78,5 +80,17 @@ impl DbUser {
         }
 
         Ok(Some(res.unwrap()))
+    }
+
+    pub async fn verify_user(pool: &Pool<Postgres>, user_id: Uuid) -> DbResult<bool> {
+        let res = sqlx::query(r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#)
+            .bind(user_id)
+            .execute(&*pool).await;
+
+        if let Err(e) = res {
+            return Err(ApiError::DatabaseError(e))
+        }
+        
+        return Ok(true)
     }
 }

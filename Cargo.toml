@@ -1,4 +1,6 @@
 [workspace]
 members = [
     "auth",
+    "auth_macro",
+    "auth_macro_derive"
 ]

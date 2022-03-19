@@ -13,6 +13,7 @@ pub struct Settings {
     pub db: DbSettings,
     pub app: AppSettings,
     pub email: EmailSettings,
+    pub redis_uri: String, // should be secret
 }
 
 

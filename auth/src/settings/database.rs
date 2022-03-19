@@ -3,10 +3,10 @@ use sqlx::{postgres::{PgConnectOptions, PgSslMode}};
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DbSettings {
-    pub host: String,
+    pub host: String, // should be secret
     pub port: u16,
     pub username: String,
-    pub password: String,
+    pub password: String, // should be secret
     pub database_name: String,
     pub require_ssl: bool,
     // pub db_url: String,
