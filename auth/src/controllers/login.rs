@@ -24,6 +24,7 @@ pub async fn user_login(
     user: Json<User>,
     pool: &State<Pool<Postgres>>,
     state: &State<Settings>,
+    redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<HashMap<&'static str, String>>>> {
     let User { email, password } = user.0;
 
@@ -36,6 +37,10 @@ pub async fn user_login(
         if Password::is_same(db_user.get_hash(), password) {
             let info: (String, uuid::Uuid) = db_user.get_user();
             let login_jwt = LoginJwt::new(parsed_email, info.1, db_user.is_verified()).encode(&state.app)?;
+
+            let mut redis_conn = redis.get_async_connection().await?;
+            // redis_conn.set
+
             let mut body = HashMap::new();
             body.insert("jwt", login_jwt);
             body.insert("verified", db_user.is_verified().to_string());

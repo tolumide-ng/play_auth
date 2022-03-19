@@ -5,7 +5,7 @@ use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{commons::{ApiResult, make_redis_key}, mail::Email, pwd::Password, jwt::{ForgotPasswordJwt, Jwt}}, response::ApiSuccess, base_repository::user::DbUser, errors::app::ApiError};
+use crate::{settings::config::Settings, helpers::{commons::{ApiResult, RedisKey, RedisPrefix}, mail::Email, pwd::Password, jwt::{ForgotPasswordJwt, Jwt}}, response::ApiSuccess, base_repository::user::DbUser, errors::app::ApiError};
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
@@ -28,7 +28,8 @@ pub async fn reset(
     let mut redis_conn = redis.get_async_connection().await?;
     let user_id = token_data.claims.get_user();
 
-    let key = make_redis_key("forgot", user_id);
+    let key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
+
 
     let key_exists: Option<String> = redis_conn.get(&key).await?;
 
@@ -42,7 +43,7 @@ pub async fn reset(
             // delete the forgot jwt token for this user
             redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
             // delete all current login_jwts for this user
-            let login_key = format!("{}:*", make_redis_key("login", user_id));
+            let login_key = format!("{}:*", RedisKey::new(RedisPrefix::Forgot, user_id).make_key());
             redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
     
             return Ok(ApiSuccess::reply_success(Some("password reset successful")));

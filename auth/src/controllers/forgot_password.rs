@@ -4,9 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;
 
-use crate::{settings::config::Settings, helpers::{mail::{Email, MailType}, commons::{ApiResult, make_redis_key}, jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser, response::ApiSuccess};
-
-const EXPIRE_AT: usize = 3600;
+use crate::{settings::config::Settings, helpers::{mail::{Email, MailType}, commons::{ApiResult, MINUTES_60, RedisKey, RedisPrefix}, jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser, response::ApiSuccess};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct User {
@@ -34,7 +32,7 @@ pub async fn forgot(
     let the_user = user.unwrap().get_user().1;
     let mut redis_conn = redis.get_async_connection().await?;
     
-    let key = make_redis_key("forgot", the_user);
+    let key = RedisKey::new(RedisPrefix::Forgot, the_user).make_key();
 
     let forgot_pwd_exists: Result<String, RedisError> = redis_conn.get(&key).await;
     if forgot_pwd_exists.is_ok() {
@@ -45,7 +43,7 @@ pub async fn forgot(
     // At this point, we haven't sent the user a new password in the last 1 hour, and the user exists
     let jwt = ForgotPasswordJwt::new(the_user).encode(&state.app)?;
     redis_conn.set(&key, &jwt).await?;
-    redis_conn.expire(&key, EXPIRE_AT).await?;
+    redis_conn.expire(&key, MINUTES_60).await?;
     println!("FORGOT PASSWORD KJWT {:#?}", jwt);
     // JWT SHOULD BE SENT TO THE EMAIL INSTEAD
     // Email::new(parsed_email, None, MailType::ForgotPassword(Uuid::new_v4()));

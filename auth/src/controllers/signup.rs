@@ -5,7 +5,7 @@ use sqlx::{Postgres, Pool};
 use dotenv::dotenv;
 
 use crate::base_repository::user::DbUser;
-use crate::helpers::commons::make_redis_key;
+use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_120};
 use crate::helpers::jwt::{SignupJwt, Jwt};
 use crate::helpers::{mail::{Email, MailType}, pwd::{Password}, commons::{Str, ApiResult}};
 use crate::{response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
@@ -40,8 +40,9 @@ pub async fn create(
         let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd.to_string()).await?;
         let jwt = SignupJwt::new(user_id).encode(&state.app)?;
 
-        let key = make_redis_key("signup", user_id);
+        let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
         redis_conn.set(&key, &jwt).await?;
+        redis_conn.expire(&key, MINUTES_120).await?;
 
         println!("the signup jwt {:#?}", jwt);
 

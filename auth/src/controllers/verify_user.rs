@@ -5,7 +5,7 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{jwt::{SignupJwt, Jwt}, commons::{ApiResult, make_redis_key}}, response::ApiSuccess, errors::app::ApiError, base_repository::user::DbUser};
+use crate::{settings::config::Settings, helpers::{jwt::{SignupJwt, Jwt}, commons::{ApiResult, RedisKey, RedisPrefix}}, response::ApiSuccess, errors::app::ApiError, base_repository::user::DbUser};
 
 
 #[derive(Deserialize, Serialize)]
@@ -27,7 +27,7 @@ pub async fn verify(
     let mut redis_conn = redis.get_async_connection().await?;
     let user_id = token_data.claims.get_user();
 
-    let key = make_redis_key("signup", user_id);
+    let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
     // does this signup token exist?
     let key_exists: Option<String> = redis_conn.get(&key).await?;
 
@@ -37,7 +37,7 @@ pub async fn verify(
     
             redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
             // delete all current login_jwts, user needs to sign in again
-            let login_key = format!("{}:*", make_redis_key("login", user_id));
+            let login_key = format!("{}:*", RedisKey::new(RedisPrefix::Login, user_id).make_key());
             redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
             return Ok(ApiSuccess::reply_success(Some("verified")));
         }
