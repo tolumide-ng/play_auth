@@ -45,10 +45,6 @@ pub async fn user_login(
             redis_conn.set(&key, &jwt).await?;
             redis_conn.expire(&key, MINUTES_20 as usize).await?;
 
-            println!("{{{{{{{{{{{{ {:#?}", key);
-
-            println!("the key!!!!!!!!! {:#?}", jwt);
-
             let mut body = HashMap::new();
             body.insert("jwt", jwt);
             body.insert("verified", db_user.is_verified().to_string());

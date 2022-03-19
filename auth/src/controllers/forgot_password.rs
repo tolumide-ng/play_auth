@@ -2,9 +2,8 @@ use redis::{RedisError, AsyncCommands};
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use uuid::Uuid;
 
-use crate::{settings::config::Settings, helpers::{mail::{Email, MailType}, commons::{ApiResult, MINUTES_60, RedisKey, RedisPrefix}, jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser, response::ApiSuccess};
+use crate::{settings::config::Settings, helpers::{mail::{Email, MailType, MailInfo}, commons::{ApiResult, MINUTES_60, RedisKey, RedisPrefix}, jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser, response::ApiSuccess};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct User {
@@ -44,9 +43,9 @@ pub async fn forgot(
     let jwt = ForgotPasswordJwt::new(the_user).encode(&state.app)?;
     redis_conn.set(&key, &jwt).await?;
     redis_conn.expire(&key, MINUTES_60 as usize).await?;
-    println!("FORGOT PASSWORD KJWT {:#?}", jwt);
-    // JWT SHOULD BE SENT TO THE EMAIL INSTEAD
-    // Email::new(parsed_email, None, MailType::ForgotPassword(Uuid::new_v4()));
+
+    let mail_type = MailType::ForgotPassword(MailInfo::new(jwt, &state.app.frontend_url));
+    Email::new(parsed_email, None, mail_type);
 
     Ok(ApiSuccess::reply_success(Some("Please check your email for the link to reset your password".to_string())))
 

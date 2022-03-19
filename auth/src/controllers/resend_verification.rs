@@ -1,0 +1,1 @@
+pub fn resend_verification_token() {}

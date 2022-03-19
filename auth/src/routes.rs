@@ -13,9 +13,6 @@ pub async fn build (config: Settings) -> Rocket<Build>{
     let db_pool = get_pool(&config.db);
     let redis_client = redis::Client::open(&*config.redis_uri).expect("Unable to establish connection to redis");
 
-
-    // println!("{{{{{{{{|||||||||||||||||| {:#?}", config);
-
     rocket::build()
         .attach(config.clone())
         .manage(db_pool)

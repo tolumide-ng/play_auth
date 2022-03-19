@@ -8,5 +8,6 @@ pub fn get_appsettings() -> AppSettings {
         p_cost: 1, 
         t_cost: 1,
         jwt_secret: "sample_jwt_secret".to_string(),
+        frontend_url: "https://testsamplefrotnend.com".to_string(),
     }
 }

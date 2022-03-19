@@ -7,6 +7,7 @@ use dotenv::dotenv;
 use crate::base_repository::user::DbUser;
 use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_120};
 use crate::helpers::jwt::{SignupJwt, Jwt};
+use crate::helpers::mail::MailInfo;
 use crate::helpers::{mail::{Email, MailType}, pwd::{Password}, commons::{Str, ApiResult}};
 use crate::{response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
@@ -43,10 +44,10 @@ pub async fn create(
         let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
         redis_conn.set(&key, &jwt).await?;
         redis_conn.expire(&key, MINUTES_120 as usize).await?;
+        
+        let mail_type = MailType::Signup(MailInfo::new(jwt, &state.app.frontend_url));
+        Email::new(parsed_email, None, mail_type).send_email(&state.email);
 
-        println!("the signup jwt {:#?}", jwt);
-
-        // Email::new(parsed_email, None, MailType::Signup(jwt)).send_email(&state.email);
         return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
     }
 

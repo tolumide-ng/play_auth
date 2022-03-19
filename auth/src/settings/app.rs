@@ -8,4 +8,5 @@ pub struct AppSettings {
     pub p_cost: u16,
     pub t_cost: u16,
     pub jwt_secret: String,
+    pub frontend_url: String,
 }

@@ -56,8 +56,6 @@ impl DbUser {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
             .fetch_one(pool).await;
 
-        println!("WHAT THE RECORD LOOKS LIKE {:#?}", user);
-
         if let Err(e) = user {
             // todo!() - tracing!
             return Err(ApiError::DatabaseError(e))

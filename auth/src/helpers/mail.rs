@@ -1,8 +1,8 @@
 use fancy_regex::Regex;
 use lazy_static::lazy_static;
+use lettre::message::{header, MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, Transport};
-use uuid::Uuid;
 
 use crate::errors::app::ApiError;
 #[cfg(feature = "test")]
@@ -11,10 +11,47 @@ use crate::stubs::email::SmtpTransport;
 use lettre::SmtpTransport;
 
 use crate::settings::email::EmailSettings;
+use crate::helpers::email_template::{signup_template, forgot_template};
+
+#[derive(Debug)]
+pub struct MailInfo {
+    token: String,
+    frontend_url: String,
+}
+
+impl MailInfo {
+    pub fn new(token: String, url: &String) -> Self {
+        Self {token, frontend_url: url.to_string()}
+    }
+
+    pub fn token(&self) -> String {
+        self.token
+    }
+
+    pub fn url(&self) -> String {
+        self.frontend_url
+    }
+}
+
+#[derive(Debug)]
 pub enum MailType {
-    // signup or forgot_pwd key/jwt
-    Signup(String),
-    ForgotPassword(String),
+    Signup(MailInfo),
+    ForgotPassword(MailInfo),
+}
+
+impl MailType {
+    pub fn content(&self) -> String {        
+        match self {
+            Self::ForgotPassword(info) => {
+                let url = format!("{}/{}", info.url(), info.token());
+                forgot_template(url)
+            }
+            Self::Signup(info) => {
+                let url = format!("{}/{}", info.url(), info.token());
+                signup_template(url)
+            }
+        }
+    }
 }
 
 // CONVERT THIS EMAIL STRUCT INTO A TRAIT OBJECT
@@ -61,9 +98,16 @@ impl Email {
             .from("Dire <noreply@gmail.com>".parse().unwrap())
             .to(format!("{} <{}>", person_name, self.recipient_email).parse().unwrap())
             .subject("Welcome to the app with no name yet!")
-            // use html file styled with css in this case
-            .body(String::from(r#"Thank you for signing up with us :wink, please 
-            activate your account by clicking the link: <>whatever the links<>"#)).unwrap();
+            .multipart(
+                MultiPart::alternative()
+                    .singlepart(
+                        SinglePart::builder()
+                            .header(header::ContentType::TEXT_HTML)
+                            .body(self.email_type.content())
+                    ) 
+            )
+            // change this to ? to cascade the handle the appropriate response here
+            .expect("failed to build email");
 
         let creds = Credentials::new(smtp_user.clone(), smtp_pass.clone());
 
