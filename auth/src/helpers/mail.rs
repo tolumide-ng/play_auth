@@ -5,6 +5,7 @@ use lettre::{Message, Transport};
 use std::fmt;
 
 
+use crate::errors::app::ApiError;
 #[cfg(feature = "test")]
 use crate::stubs::email::SmtpTransport;
 #[cfg(not(feature = "test"))]
@@ -46,7 +47,7 @@ impl Email {
         }
     }
 
-    pub fn parse(email: String) -> Result<ValidEmail, ()> {
+    pub fn parse(email: String) -> Result<ValidEmail, ApiError> {
         lazy_static! {
             static ref USER_EMAIL: Regex = Regex::new(r#"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})"#).unwrap();
         }
@@ -55,7 +56,7 @@ impl Email {
             return Ok(ValidEmail(email))
         }
 
-        Err(())
+        Err(ApiError::ValidationError("Please provide a valid email address"))
     }
 
     pub fn send_email(self, mail: &EmailSettings) {

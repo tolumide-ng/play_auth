@@ -22,32 +22,24 @@ pub async fn verify(
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     let User {token} = user.0;
 
-    let user_token: Result<TokenData<SignupJwt>, _> = SignupJwt::decode(&token, &state.app);
+    let token: TokenData<SignupJwt> = SignupJwt::decode(&token, &state.app)?;
 
-    match user_token {
-        Ok(token) => {
-            let mut redis_conn = redis.get_async_connection().await?;
-            let user_id = token.claims.get_user();
+    let mut redis_conn = redis.get_async_connection().await?;
+    let user_id = token.claims.get_user();
 
-            let key = make_redis_key("signup", user_id);
-            // does this signup token exist?
-            let key_exists: Result<Option<String>, RedisError> = redis_conn.get(&key).await;
+    let key = make_redis_key("signup", user_id);
+    // does this signup token exist?
+    let key_exists: Result<Option<String>, RedisError> = redis_conn.get(&key).await;
 
-            if key_exists.is_ok() && key_exists.unwrap().is_some() {
-                DbUser::verify_user(pool, user_id).await?;
+    if key_exists.is_ok() && key_exists.unwrap().is_some() {
+        DbUser::verify_user(pool, user_id).await?;
 
-                redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
-                // delete all current login_jwts, user needs to sign in again
-                let login_key = format!("{}:*", make_redis_key("login", user_id));
-                redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
-                return Ok(ApiSuccess::reply_success(Some("verified")));
-            }
-
-            return Err(ApiError::BadRequest("Token is either expired or does not exist"))
-        },
-        Err(e) => {
-            println!("THE ACTUAL ERR {:#?}", e);
-            Err(ApiError::BadRequest("Token is either expired or does not exist"))
-        }
+        redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
+        // delete all current login_jwts, user needs to sign in again
+        let login_key = format!("{}:*", make_redis_key("login", user_id));
+        redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
+        return Ok(ApiSuccess::reply_success(Some("verified")));
     }
+
+    return Err(ApiError::AuthenticationError("Token is either expired or does not exist"))
 }

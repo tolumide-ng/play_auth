@@ -27,21 +27,15 @@ pub async fn user_login(
 ) -> ApiResult<Json<ApiSuccess<HashMap<&'static str, String>>>> {
     let User { email, password } = user.0;
 
-    let parsed_email = Email::parse(email);
+    let parsed_email = Email::parse(email)?;
 
-    if parsed_email.is_err() {
-        return Err(ApiError::BadRequest("Please provide a valid email address"))
-    }
-
-    let valid_email = parsed_email.unwrap();
-
-    let user = DbUser::email_exists(pool, &valid_email).await?;
+    let user = DbUser::email_exists(pool, &parsed_email).await?;
 
 
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
             let info: (String, uuid::Uuid) = db_user.get_user();
-            let login_jwt = LoginJwt::new(valid_email, info.1, db_user.is_verified()).encode(&state.app)?;
+            let login_jwt = LoginJwt::new(parsed_email, info.1, db_user.is_verified()).encode(&state.app)?;
             let mut body = HashMap::new();
             body.insert("jwt", login_jwt);
             body.insert("verified", db_user.is_verified().to_string());

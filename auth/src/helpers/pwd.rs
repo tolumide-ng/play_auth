@@ -9,13 +9,13 @@ use argon2::{Algorithm::Argon2id, Version::V0x13, Params};
 use lazy_static::lazy_static;
 use fancy_regex::Regex;
 
-use crate::{settings::{app::AppSettings}};
+use crate::{settings::{app::AppSettings}, errors::app::ApiError};
 
 
 pub struct Password(String);
 
 impl Password {
-    pub fn new(pwd: String, app: &AppSettings) -> Option<Self> {
+    pub fn new(pwd: String, app: &AppSettings) -> Result<Self, ApiError> {
 
         let AppSettings { m_cost, p_cost, t_cost, .. } = *app;
 
@@ -28,10 +28,11 @@ impl Password {
             let pwd_hash = argon2.hash_password(pwd_bytes, &salt).unwrap().to_string();
 
             // return Some(Self(PasswordHashString::new(&pwd_hash).unwrap()))
-            return Some(Self(pwd_hash))
+            return Ok(Self(pwd_hash))
         }
 
-        None
+        Err(ApiError::ValidationError("Password must be atleast 8 characters long containing atleast
+            one special character, a capital letter, a small letter, and a digit"))
 
     }
 
@@ -63,36 +64,36 @@ mod tests {
     #[test]
     fn alphabets_only_password_is_invalid() {
         let pwd = "password".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_err());
     }
 
     #[test]
     fn numbers_only_password_is_invalid() {
         let pwd = "12345".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_err());
     }
 
     #[test]
     fn alphabets_and_numbers_only_is_invalid() {
         let pwd = "1234password".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_err());
     }
 
     #[test]
     fn password_with_short_length_is_invalid() {
         let pwd = "ATyp23*".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_err());
     }
 
     #[test]
     fn password_with_special_characters_only_is_invalid() {
         let pwd = "********#######".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_none());
+        assert!(Password::new(pwd, &get_appsettings()).is_err());
     }
 
     #[test]
     fn valid_password() {
         let pwd = "Authentication1234\"".to_string();
-        assert!(Password::new(pwd, &get_appsettings()).is_some());
+        assert!(Password::new(pwd, &get_appsettings()).is_ok());
     }
 }

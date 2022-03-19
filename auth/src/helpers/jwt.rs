@@ -6,6 +6,7 @@ use jsonwebtoken::{encode, EncodingKey, Header, decode, DecodingKey, Validation,
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
+use crate::errors::app::ApiError;
 use crate::settings::{app::AppSettings};
 use crate::helpers::mail::ValidEmail;
 
@@ -14,14 +15,18 @@ impl<T> DeserializeOwned for T where T: for<'de> Deserialize<'de> {}
 
 pub trait Jwt where Self: Serialize + DeserializeOwned {
 
-    fn encode(&self, app: &AppSettings) -> Result<String, jsonwebtoken::errors::Error> {
+    fn encode(&self, app: &AppSettings) -> Result<String, ApiError> {
         let AppSettings { jwt_secret, ..} = app;
-        encode(&Header::default(), &self, &EncodingKey::from_secret(&jwt_secret.as_ref()))
+        let token = encode(&Header::default(), &self, &EncodingKey::from_secret(&jwt_secret.as_ref()))?;
+        
+        Ok(token)
     }
 
-    fn decode<T: DeserializeOwned>(token: &str, app: &AppSettings) -> Result<TokenData<T>, jsonwebtoken::errors::Error> {
+    fn decode<T: DeserializeOwned>(token: &str, app: &AppSettings) -> Result<TokenData<T>, ApiError> {
         let AppSettings { jwt_secret, .. } = app;
-        decode::<T>(token, &DecodingKey::from_secret(jwt_secret.as_ref()), &Validation::new(jsonwebtoken::Algorithm::HS256))
+        let data = decode::<T>(token, &DecodingKey::from_secret(jwt_secret.as_ref()), &Validation::new(jsonwebtoken::Algorithm::HS256))?;
+
+        Ok(data)
     }
 }
 
@@ -117,7 +122,7 @@ mod test_jwt {
         assert!(decoded_token.is_ok());
         let token = decoded_token.unwrap();
         assert_eq!(token.claims.subj, "Forgot".to_string());
-        assert_eq!(token.claims.user_id, user_id);
+        assert_eq!(token.claims.get_user(), user_id);
     }
 
     #[test]

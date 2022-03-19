@@ -21,14 +21,10 @@ pub async fn forgot(
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<String>>> {
     let User { email } = user.0;
-    let parsed_email = Email::parse(email);
-
-    if parsed_email.is_err() {
-        return Err(ApiError::BadRequest("Please provide a valid email address"))
-    }
+    let parsed_email = Email::parse(email)?;
     
-    let valid_email = parsed_email.unwrap();
-    let user = DbUser::email_exists(pool, &valid_email).await?;
+    // let valid_email = parsed_email.unwrap();
+    let user = DbUser::email_exists(pool, &parsed_email).await?;
     
     if user.is_none() {
         // Avoid telling the user whether the email exists or not (Security)
