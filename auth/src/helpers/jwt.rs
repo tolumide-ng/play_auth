@@ -91,6 +91,10 @@ impl LoginJwt {
         let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_20)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id, verified }
     }
+
+    pub fn email(&self) -> String {
+        self.email
+    }
 }
 
 impl Jwt for LoginJwt {}

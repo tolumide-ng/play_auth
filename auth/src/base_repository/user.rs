@@ -21,6 +21,11 @@ pub struct User {
     updated_at: chrono::NaiveDateTime,
 }
 
+struct UserInfo {
+    pub email: String,
+    pub user_id: Uuid,
+}
+
 impl User {
     pub fn get_hash(&self) -> String {
         self.hash.clone()

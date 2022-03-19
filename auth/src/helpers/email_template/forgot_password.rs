@@ -1,4 +1,4 @@
-pub fn forgot_template (activation_token: String) -> String {
+pub fn forgot_template (url: String) -> String {
     let message = format!(
         r#"
         <!DOCTYPE html>
@@ -13,7 +13,7 @@ pub fn forgot_template (activation_token: String) -> String {
             <h4>Welcome to Cereal</h4>
             <div class="">
                 <p>Please click on the button below to reset password, this link expires in 20 minutes, please ignore the message if you did not request for a password change</p>
-                <p><a href="http://frontendapp/{activation_token}" target="_blank" rel="noopener noreferrer">Activate your account</a></p>
+                <p><a href="{url}" target="_blank" rel="noopener noreferrer">Activate your account</a></p>
             </div>
         </body>
         </html>

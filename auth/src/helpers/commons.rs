@@ -10,6 +10,7 @@ pub type ApiResult<T> = std::result::Result<T, ApiError>;
 
 pub type DbResult<T> = Result<T, ApiError>;
 
+/// RedisPrefix used for prefixing redis
 #[derive(Debug, PartialEq, derive_more::Display)]
 pub enum RedisPrefix {
     #[display(fmt = "signup")]
@@ -18,6 +19,7 @@ pub enum RedisPrefix {
     Login,
     #[display(fmt = "forgot")]
     Forgot,
+    /// means login without timestamp, this is used to delete all login tokens
     #[display(fmt = "login")]
     LoginWithoutTs,
 }

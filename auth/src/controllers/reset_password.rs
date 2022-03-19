@@ -29,8 +29,7 @@ pub async fn reset(
     let user_id = token_data.claims.get_user();
 
     let key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
-
-
+    
     let key_exists: Option<String> = redis_conn.get(&key).await?;
 
 
