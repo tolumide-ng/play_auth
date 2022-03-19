@@ -45,7 +45,7 @@ pub async fn create(
 
         println!("the signup jwt {:#?}", jwt);
 
-        Email::new(parsed_email, None, MailType::Signup(""), Some(user_id.to_string())).send_email(&state.email);
+        // Email::new(parsed_email, None, MailType::Signup(jwt)).send_email(&state.email);
         return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
     }
 

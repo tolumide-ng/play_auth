@@ -110,7 +110,7 @@ impl DbUser {
     }
 
     pub async fn update_pwd(pool: &Pool<Postgres>, password: Password, email: ValidEmail) -> DbResult<bool> {
-        let res = sqlx::query(r#"UPDATE play_user SET password=$1 WHERE user_id=$2 RETURNING *"#)
+        let res = sqlx::query(r#"UPDATE play_user SET hash=$1 WHERE email=$2 RETURNING *"#)
             .bind(password.to_string())
             .bind(email.to_string())
             .execute(&*pool).await;

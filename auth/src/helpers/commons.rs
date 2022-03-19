@@ -1,8 +1,6 @@
 use crate::errors::app::ApiError;
 
-use super::mail::ValidEmail;
 pub type Str = &'static str;
-
 
 pub type ApiResult<T> = std::result::Result<T, ApiError>;
 

@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use argon2::{
     password_hash::{
         rand_core::OsRng, 

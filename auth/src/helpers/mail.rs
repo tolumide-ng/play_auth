@@ -2,8 +2,7 @@ use fancy_regex::Regex;
 use lazy_static::lazy_static;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, Transport};
-use std::fmt;
-
+use uuid::Uuid;
 
 use crate::errors::app::ApiError;
 #[cfg(feature = "test")]
@@ -14,8 +13,8 @@ use lettre::SmtpTransport;
 use crate::settings::email::EmailSettings;
 pub enum MailType {
     // signup or forgot_pwd key/jwt
-    Signup(&'static str),
-    ForgotPassword(&'static str),
+    Signup(String),
+    ForgotPassword(String),
 }
 
 // CONVERT THIS EMAIL STRUCT INTO A TRAIT OBJECT
@@ -23,7 +22,6 @@ pub struct Email {
     recipient_email: ValidEmail,
     recipient_name: Option<String>,
     email_type: MailType,
-    content: Option<String>,
 }
 
 #[derive(Debug, Clone, derive_more::Display)]
@@ -31,12 +29,11 @@ pub struct ValidEmail(#[display(fmt = "{0}")]String);
 
 
 impl Email {
-    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType, content: Option<String>) -> Self {
+    pub fn new(recipient_email: ValidEmail, recipient_name: Option<String>, email_type: MailType) -> Self {
         Self {
             recipient_email,
             recipient_name,
             email_type,
-            content,
         }
     }
 

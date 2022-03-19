@@ -1,7 +1,7 @@
 use auth_macro::jwt::JwtHelper;
 use jsonwebtoken::TokenData;
 use rocket::{serde::json::Json, State};
-use redis::{RedisError, AsyncCommands};
+use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
