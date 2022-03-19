@@ -31,21 +31,19 @@ pub async fn verify(
 
             let key = make_redis_key("signup", user_id);
             // does this signup token exist?
-            let key_exists: Result<String, RedisError> = redis_conn.get(&key).await;
+            let key_exists: Result<Option<String>, RedisError> = redis_conn.get(&key).await;
 
-
-            if key_exists.is_ok() {
+            if key_exists.is_ok() && key_exists.unwrap().is_some() {
                 DbUser::verify_user(pool, user_id).await?;
 
                 redis::cmd("DEL").arg(&[&key]).query_async(&mut redis_conn).await?;
                 // delete all current login_jwts, user needs to sign in again
                 let login_key = format!("{}:*", make_redis_key("login", user_id));
                 redis::cmd("DEL").arg(&[&login_key]).query_async(&mut redis_conn).await?;
+                return Ok(ApiSuccess::reply_success(Some("verified")));
             }
-            
-            Err(ApiError::BadRequest("Token is either expired or does not exist"))
 
-            
+            return Err(ApiError::BadRequest("Token is either expired or does not exist"))
         },
         Err(e) => {
             println!("THE ACTUAL ERR {:#?}", e);
