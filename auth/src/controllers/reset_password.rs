@@ -23,19 +23,14 @@ pub async fn reset(
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     let User {email, password, token} = user.0;
 
-    println!("the provided token {:#?}", token);
     let token_data: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&token, &state.app)?;
-
 
     let mut redis_conn = redis.get_async_connection().await?;
     let user_id = token_data.claims.get_user();
 
     let key = make_redis_key("forgot", user_id);
 
-    println!("THE CURRENT KEY {:#?}", key);
     let key_exists: Option<String> = redis_conn.get(&key).await?;
-
-    println!("THE KEY THAT CURRENTLY EXISTS {:#?}", key_exists);
 
 
     if let Some(data) = key_exists {
