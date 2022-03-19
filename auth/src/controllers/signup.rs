@@ -55,6 +55,8 @@ pub async fn create(
         let key = make_redis_key("signup", user_id);
         redis_conn.set(&key, &jwt).await?;
 
+        println!("the signup jwt {:#?}", jwt);
+
         Email::new(valid_email, None, MailType::Signup(""), Some(user_id.to_string())).send_email(&state.email);
         return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
     }

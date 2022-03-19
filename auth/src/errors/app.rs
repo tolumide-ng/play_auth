@@ -41,6 +41,8 @@ pub enum ApiError {
     #[error("Authorization Error")]
     AuthorizationError(&'static str),
     #[error("Internal Server Error")]
+    InternalServerError,
+    #[error("Internal Server Error")]
     PasswordError(#[from] PError),
     #[error("Internal Server Error")]
     RedisError(#[from] RedisError),
@@ -58,7 +60,7 @@ impl ApiError {
 
         match self {
             ValidationError(_) | BadRequest(_) => Status::BadRequest,
-            DatabaseError(_) | PasswordError(_) | RedisError(_) => Status::InternalServerError,
+            DatabaseError(_) | PasswordError(_) | RedisError(_) | InternalServerError => Status::InternalServerError,
             JwtError(_) | AuthenticationError(_) => Status::Unauthorized,
             Conflict(_) => Status::Conflict,
             AuthorizationError(_) | UnverifiedAccount => Status::Forbidden,

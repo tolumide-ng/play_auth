@@ -68,8 +68,6 @@ impl DbUser {
     }
 
     pub async fn email_exists(pool: &Pool<Postgres>, email: &ValidEmail) -> DbResult<Option<User>> {
-        use dotenv::dotenv;
-        dotenv().ok();
         let res = sqlx::query_as!(User, r#"SELECT * FROM play_user WHERE (email = $1)"#, email.to_string())
             .fetch_one(pool)
             .await;
@@ -82,5 +80,17 @@ impl DbUser {
         }
 
         Ok(Some(res.unwrap()))
+    }
+
+    pub async fn verify_user(pool: &Pool<Postgres>, user_id: Uuid) -> DbResult<bool> {
+        let res = sqlx::query(r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#)
+            .bind(user_id)
+            .execute(&*pool).await;
+
+        if let Err(e) = res {
+            return Err(ApiError::DatabaseError(e))
+        }
+        
+        return Ok(true)
     }
 }
