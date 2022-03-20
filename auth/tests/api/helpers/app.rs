@@ -28,7 +28,7 @@ impl TestClient {
     }
 
     pub async fn clean_db(&self) {
-        let abc = sqlx::query(r#"DELETE FROM play_user"#).execute(&self.db).await;
+        sqlx::query(r#"DELETE FROM play_user"#).execute(&self.db).await.unwrap();
     }
 
     pub async fn clean_email_in_db(&self, email: String) {

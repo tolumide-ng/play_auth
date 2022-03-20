@@ -7,7 +7,7 @@ use dotenv::dotenv;
 use crate::base_repository::user::DbUser;
 use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_120, ApiResult};
 use crate::helpers::jwt_tokens::jwt::{SignupJwt, Jwt};
-use crate::helpers::{mails::email::{Email, MailType, MailInfo}, pwd::{Password}};
+use crate::helpers::{mails::email::{Email, MailType, MailInfo}, passwords::pwd::Password};
 use crate::{response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
 

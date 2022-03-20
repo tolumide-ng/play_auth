@@ -3,7 +3,7 @@ use sqlx::Error::{RowNotFound};
 use uuid::Uuid;
 
 use crate::helpers::mails::email::ValidEmail;
-use crate::helpers::pwd::Password;
+use crate::helpers::passwords::pwd::Password;
 use crate::{helpers::commons::{DbResult}, errors::app::ApiError};
 
 

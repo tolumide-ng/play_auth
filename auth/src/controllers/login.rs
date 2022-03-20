@@ -11,7 +11,7 @@ use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;
 use crate::errors::app::ApiError;
 use crate:: settings::{config::Settings};
-use crate::helpers::{commons::{ApiResult}, pwd::Password, mails::email::Email};
+use crate::helpers::{commons::{ApiResult}, passwords::pwd::Password, mails::email::Email};
 
 
 #[derive(Deserialize, Serialize)]
