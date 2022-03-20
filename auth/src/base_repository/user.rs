@@ -3,6 +3,7 @@ use sqlx::Error::{RowNotFound};
 use uuid::Uuid;
 
 use crate::helpers::mail::ValidEmail;
+use crate::helpers::pwd::Password;
 use crate::{helpers::commons::{DbResult}, errors::app::ApiError};
 
 
@@ -18,6 +19,11 @@ pub struct User {
     username: Option<String>,
     created_at: chrono::NaiveDateTime,
     updated_at: chrono::NaiveDateTime,
+}
+
+struct UserInfo {
+    pub email: String,
+    pub user_id: Uuid,
 }
 
 impl User {
@@ -55,8 +61,6 @@ impl DbUser {
         let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
             .fetch_one(pool).await;
 
-        println!("WHAT THE RECORD LOOKS LIKE {:#?}", user);
-
         if let Err(e) = user {
             // todo!() - tracing!
             return Err(ApiError::DatabaseError(e))
@@ -82,6 +86,20 @@ impl DbUser {
         Ok(Some(res.unwrap()))
     }
 
+    //    // r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#
+    // pub async fn update_onerrrr(pool: &Pool<Postgres>, target: &'static str, condition_name: &'static str, condition_value: &'static str) -> DbResult<bool> {
+    //     let query = format!("UPDATE play_user SET {} WHERE {}=$1 RETURNING *", target, condition_name);
+    //     let res = sqlx::query(&query)
+    //         .bind(condition_value)
+    //         .execute(&*pool).await;
+
+    //     if let Err(e) = res {
+    //         return Err(ApiError::DatabaseError(e))
+    //     }
+        
+    //     return Ok(true)
+    // }
+
     pub async fn verify_user(pool: &Pool<Postgres>, user_id: Uuid) -> DbResult<bool> {
         let res = sqlx::query(r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#)
             .bind(user_id)
@@ -92,5 +110,18 @@ impl DbUser {
         }
         
         return Ok(true)
+    }
+
+    pub async fn update_pwd(pool: &Pool<Postgres>, password: Password, email: ValidEmail) -> DbResult<bool> {
+        let res = sqlx::query(r#"UPDATE play_user SET hash=$1 WHERE email=$2 RETURNING *"#)
+            .bind(password.to_string())
+            .bind(email.to_string())
+            .execute(&*pool).await;
+
+        if let Err(e) = res {
+            return Err(ApiError::DatabaseError(e))
+        }
+
+        Ok(true)
     }
 }

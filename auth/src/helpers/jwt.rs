@@ -6,22 +6,29 @@ use jsonwebtoken::{encode, EncodingKey, Header, decode, DecodingKey, Validation,
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
+use crate::errors::app::ApiError;
 use crate::settings::{app::AppSettings};
 use crate::helpers::mail::ValidEmail;
+
+use super::commons::{MINUTES_120, MINUTES_20};
 
 pub trait DeserializeOwned: for<'de> Deserialize<'de> {}
 impl<T> DeserializeOwned for T where T: for<'de> Deserialize<'de> {}
 
 pub trait Jwt where Self: Serialize + DeserializeOwned {
 
-    fn encode(&self, app: &AppSettings) -> Result<String, jsonwebtoken::errors::Error> {
+    fn encode(&self, app: &AppSettings) -> Result<String, ApiError> {
         let AppSettings { jwt_secret, ..} = app;
-        encode(&Header::default(), &self, &EncodingKey::from_secret(&jwt_secret.as_ref()))
+        let token = encode(&Header::default(), &self, &EncodingKey::from_secret(&jwt_secret.as_ref()))?;
+        
+        Ok(token)
     }
 
-    fn decode<T: DeserializeOwned>(token: &str, app: &AppSettings) -> Result<TokenData<T>, jsonwebtoken::errors::Error> {
+    fn decode<T: DeserializeOwned>(token: &str, app: &AppSettings) -> Result<TokenData<T>, ApiError> {
         let AppSettings { jwt_secret, .. } = app;
-        decode::<T>(token, &DecodingKey::from_secret(jwt_secret.as_ref()), &Validation::new(jsonwebtoken::Algorithm::HS256))
+        let data = decode::<T>(token, &DecodingKey::from_secret(jwt_secret.as_ref()), &Validation::new(jsonwebtoken::Algorithm::HS256))?;
+
+        Ok(data)
     }
 }
 
@@ -36,8 +43,8 @@ pub struct SignupJwt {
 impl SignupJwt {
     pub fn new(user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        // INFORM THE USER THAT SIGNUP TOKEN EXPIRES AFTER ONE HOUR
-        let exp = SystemTime::now().checked_add(Duration::from_secs(7200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
+        // INFORM THE USER THAT SIGNUP TOKEN EXPIRES AFTER TWO HOURS
+        let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_120)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
 
         Self { user_id, iat, exp, subj: "Signup".to_string(), }
     }
@@ -60,7 +67,8 @@ impl Jwt for ForgotPasswordJwt {}
 impl ForgotPasswordJwt {
     pub fn new(user_id: Uuid) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        let exp = SystemTime::now().checked_add(Duration::from_secs(1200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
+        // 20 minutes
+        let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_20)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         Self { user_id, exp, iat, subj: "Forgot".to_string(), }
     }
 }
@@ -79,8 +87,13 @@ pub struct LoginJwt {
 impl LoginJwt {
     pub fn new(email: ValidEmail, user_id: Uuid, verified: bool) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        let exp = SystemTime::now().checked_add(Duration::from_secs(1200)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
+        // 20 minutes
+        let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_20)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id, verified }
+    }
+
+    pub fn email(&self) -> String {
+        self.email
     }
 }
 
@@ -117,7 +130,7 @@ mod test_jwt {
         assert!(decoded_token.is_ok());
         let token = decoded_token.unwrap();
         assert_eq!(token.claims.subj, "Forgot".to_string());
-        assert_eq!(token.claims.user_id, user_id);
+        assert_eq!(token.claims.get_user(), user_id);
     }
 
     #[test]
