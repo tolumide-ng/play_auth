@@ -93,7 +93,7 @@ impl LoginJwt {
     }
 
     pub fn email(&self) -> String {
-        self.email
+        self.email.to_string()
     }
 }
 

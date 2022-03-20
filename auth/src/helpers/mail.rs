@@ -25,11 +25,11 @@ impl MailInfo {
     }
 
     pub fn token(&self) -> String {
-        self.token
+        self.token.to_string()
     }
 
     pub fn url(&self) -> String {
-        self.frontend_url
+        self.frontend_url.to_string()
     }
 }
 
