@@ -1,4 +1,4 @@
-pub mod response;
+pub mod tokens;
 pub mod mail;
 pub mod commons;
 pub mod test_helpers;
