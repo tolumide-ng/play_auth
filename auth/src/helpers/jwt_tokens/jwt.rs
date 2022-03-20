@@ -10,7 +10,7 @@ use crate::errors::app::ApiError;
 use crate::settings::{app::AppSettings};
 use crate::helpers::mail::ValidEmail;
 
-use super::commons::{MINUTES_120, MINUTES_20};
+use crate::helpers::commons::{MINUTES_120, MINUTES_20};
 
 #[cfg(test)]
 #[path = "./jwt_test.rs"]

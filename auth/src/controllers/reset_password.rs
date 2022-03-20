@@ -5,7 +5,13 @@ use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{commons::{ApiResult, RedisKey, RedisPrefix}, mail::Email, pwd::Password, jwt::{ForgotPasswordJwt, Jwt}}, response::ApiSuccess, base_repository::user::DbUser, errors::app::ApiError};
+use crate::settings::config::Settings;
+use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
+use crate::helpers::{mail::Email, pwd::Password};
+use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, Jwt};
+use crate::response::ApiSuccess;
+use crate::base_repository::user::DbUser;
+use crate::errors::app::ApiError;
 
 #[derive(Deserialize, Serialize)]
 pub struct User {

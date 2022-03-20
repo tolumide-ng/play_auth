@@ -3,7 +3,14 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{mail::{Email, MailType, MailInfo}, commons::{ApiResult, MINUTES_60, RedisKey, RedisPrefix}, jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser, response::ApiSuccess};
+
+use crate::settings::config::Settings;
+use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix, MINUTES_60};
+use crate::helpers::mail::{Email, MailInfo, MailType};
+use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, Jwt};
+use crate::response::ApiSuccess;
+use crate::base_repository::user::DbUser;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct User {

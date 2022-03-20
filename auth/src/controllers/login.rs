@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
 use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_20};
-use crate::helpers::jwt::{LoginJwt, Jwt};
+use crate::helpers::jwt_tokens::jwt::{LoginJwt, Jwt};
 use crate::helpers::tokens::{FingerPrint};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;

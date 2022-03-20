@@ -1,11 +1,14 @@
 use auth_macro::jwt::JwtHelper;
 use jsonwebtoken::TokenData;
-use redis::{AsyncCommands, AsyncIter, Value, RedisError};
+use redis::{AsyncCommands, RedisError};
 use rocket::{serde::json::Json, State, futures::StreamExt};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{commons::{ApiResult, RedisKey, RedisPrefix}, jwt::{LoginJwt, Jwt}}, response::ApiSuccess};
+use crate::settings::config::Settings;
+use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
+use crate::helpers::jwt_tokens::jwt::{LoginJwt, Jwt};
+use crate::response::ApiSuccess;
 
 
 #[derive(Deserialize, Serialize)]
@@ -16,7 +19,7 @@ pub struct User {
 #[post("/logout", data = "<user>")]
 pub async fn logout(
     user: Json<User>,
-    pool: &State<Pool<Postgres>>,
+    _pool: &State<Pool<Postgres>>,
     state: &State<Settings>,
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
