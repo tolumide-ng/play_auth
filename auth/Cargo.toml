@@ -38,6 +38,7 @@ mockall_double = "0.1.0"
 redis = { version="0.21.5", features=["tokio-native-tls-comp", "tokio-comp", "aio", "connection-manager", "cluster"] }
 auth_macro = { path = "../auth_macro" }
 auth_macro_derive = { path = "../auth_macro_derive" }
+sha2 = "0.10.2"
 
 [dependencies.rocket]
 version = "0.5.0-rc.1"

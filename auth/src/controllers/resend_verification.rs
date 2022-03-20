@@ -5,10 +5,11 @@ use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{settings::config::Settings, helpers::{commons::{ApiResult, RedisKey, RedisPrefix}, jwt::{ForgotPasswordJwt, Jwt, LoginJwt, SignupJwt}, mail::{Email, MailType, MailInfo}}, response::ApiSuccess, errors::app::ApiError, base_repository::user::DbUser};
+use crate::{settings::config::Settings, helpers::{commons::{ApiResult, RedisKey, RedisPrefix}, jwt::{Jwt, LoginJwt, SignupJwt}, mail::{Email, MailType, MailInfo}}, response::ApiSuccess, errors::app::ApiError, base_repository::user::DbUser};
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
+    // this should be on the request header instead
     token: String
 }
 
