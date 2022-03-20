@@ -1,3 +1,4 @@
+use base64ct::Error as B64Error;
 use jsonwebtoken::errors::Error as JwtError;
 use thiserror::Error;
 use rocket::{
@@ -48,6 +49,8 @@ pub enum ApiError {
     RedisError(#[from] RedisError),
     #[error("Please verify your account by clicking the email sent on signup")]
     UnverifiedAccount,
+    #[error("Authentication Error")]
+    Base64Error(#[from] B64Error),
     
     // #[error(transparent)]
     // UnexpectedError(#[from] anyhow::Error),
@@ -61,7 +64,7 @@ impl ApiError {
         match self {
             ValidationError(_) | BadRequest(_) => Status::BadRequest,
             DatabaseError(_) | PasswordError(_) | RedisError(_) | InternalServerError => Status::InternalServerError,
-            JwtError(_) | AuthenticationError(_) => Status::Unauthorized,
+            JwtError(_) | AuthenticationError(_) | Base64Error(_) => Status::Unauthorized,
             Conflict(_) => Status::Conflict,
             AuthorizationError(_) | UnverifiedAccount => Status::Forbidden,
         }
