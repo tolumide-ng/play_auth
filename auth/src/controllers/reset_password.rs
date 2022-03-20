@@ -5,6 +5,7 @@ use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
+use crate::helpers::requests::AuthUser;
 use crate::settings::config::Settings;
 use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
 use crate::helpers::{mails::email::Email, passwords::pwd::Password};
@@ -20,12 +21,15 @@ pub struct User {
     token: String,
 }
 
+
+
 #[put("/reset", data = "<user>")]
 pub async fn reset(
     user: Json<User>,
     pool: &State<Pool<Postgres>>,
     state: &State<Settings>,
     redis: &State<redis::Client>,
+    key: AuthUser<'_>,
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     let User {email, password, token} = user.0;
 
