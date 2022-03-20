@@ -8,12 +8,12 @@ use uuid::Uuid;
 
 use crate::errors::app::ApiError;
 use crate::settings::{app::AppSettings};
-use crate::helpers::mail::ValidEmail;
+use crate::helpers::mails::email::ValidEmail;
 
 use crate::helpers::commons::{MINUTES_120, MINUTES_20};
 
 #[cfg(test)]
-#[path = "./jwt_test.rs"]
+#[path = "./jwt.test.rs"]
 mod jwt_test;
 
 pub trait DeserializeOwned: for<'de> Deserialize<'de> {}

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test_jwt {
     use crate::helpers::test_helpers::get_appsettings;
-    use crate::helpers::mail::{Email, ValidEmail};
+    use crate::helpers::mails::email::{Email, ValidEmail};
     use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, LoginJwt, SignupJwt, Jwt};
     use fake::Fake;
     use auth_macro::jwt::JwtHelper;

@@ -13,6 +13,10 @@ use lettre::SmtpTransport;
 use crate::settings::email::EmailSettings;
 use crate::helpers::email_template::{signup_template, forgot_template};
 
+#[cfg(feature = "test")]
+#[path = "./email.test.rs"]
+mod email_test;
+
 #[derive(Debug)]
 pub struct MailInfo {
     token: String,
@@ -54,14 +58,14 @@ impl MailType {
     }
 }
 
-// CONVERT THIS EMAIL STRUCT INTO A TRAIT OBJECT
+
 pub struct Email {
     recipient_email: ValidEmail,
     recipient_name: Option<String>,
     email_type: MailType,
 }
 
-#[derive(Debug, Clone, derive_more::Display)]
+#[derive(Debug, Clone, PartialEq, derive_more::Display)]
 pub struct ValidEmail(#[display(fmt = "{0}")]String);
 
 

@@ -7,7 +7,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::settings::config::Settings;
 use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
-use crate::helpers::mail::{Email, MailInfo, MailType};
+use crate::helpers::mails::email::{Email, MailInfo, MailType};
 use crate::helpers::jwt_tokens::jwt::{LoginJwt, SignupJwt, Jwt};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;

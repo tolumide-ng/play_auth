@@ -2,7 +2,7 @@ use sqlx::{Pool, Postgres, types::chrono};
 use sqlx::Error::{RowNotFound};
 use uuid::Uuid;
 
-use crate::helpers::mail::ValidEmail;
+use crate::helpers::mails::email::ValidEmail;
 use crate::helpers::pwd::Password;
 use crate::{helpers::commons::{DbResult}, errors::app::ApiError};
 
@@ -85,20 +85,6 @@ impl DbUser {
 
         Ok(Some(res.unwrap()))
     }
-
-    //    // r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#
-    // pub async fn update_onerrrr(pool: &Pool<Postgres>, target: &'static str, condition_name: &'static str, condition_value: &'static str) -> DbResult<bool> {
-    //     let query = format!("UPDATE play_user SET {} WHERE {}=$1 RETURNING *", target, condition_name);
-    //     let res = sqlx::query(&query)
-    //         .bind(condition_value)
-    //         .execute(&*pool).await;
-
-    //     if let Err(e) = res {
-    //         return Err(ApiError::DatabaseError(e))
-    //     }
-        
-    //     return Ok(true)
-    // }
 
     pub async fn verify_user(pool: &Pool<Postgres>, user_id: Uuid) -> DbResult<bool> {
         let res = sqlx::query(r#"UPDATE play_user SET verified=true WHERE user_id=$1 RETURNING *"#)
