@@ -6,7 +6,7 @@ use sqlx::{Postgres, Pool};
 
 use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_20};
 use crate::helpers::jwt::{LoginJwt, Jwt};
-use crate::helpers::tokens::Token;
+use crate::helpers::tokens::{Token, FingerPrint};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;
 use crate::errors::app::ApiError;
@@ -30,7 +30,7 @@ pub async fn user_login(
 ) -> ApiResult<Json<ApiSuccess<HashMap<&'static str, String>>>> {
     Token::new();
 
-    
+
     let User { email, password } = user.0;
 
     let parsed_email = Email::parse(email)?;
@@ -40,9 +40,10 @@ pub async fn user_login(
 
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
+            let context = FingerPrint::new();
             let info: (String, uuid::Uuid) = db_user.get_user();
             let user_id = info.1;
-            let jwt = LoginJwt::new(parsed_email, user_id, db_user.is_verified()).encode(&state.app)?;
+            let jwt = LoginJwt::new(parsed_email, user_id, context.encoded(), db_user.is_verified()).encode(&state.app)?;
 
             let mut redis_conn = redis.get_async_connection().await?;
             let key = RedisKey::new(RedisPrefix::Login, user_id).make_key();

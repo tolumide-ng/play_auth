@@ -79,17 +79,18 @@ pub struct LoginJwt {
     email: String,
     user_id: Uuid,
     verified: bool,
+    context: String,
     exp: usize,
     iat: usize,
     subj: String,
 }
 
 impl LoginJwt {
-    pub fn new(email: ValidEmail, user_id: Uuid, verified: bool) -> Self {
+    pub fn new(email: ValidEmail, user_id: Uuid, context: String, verified: bool) -> Self {
         let iat = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
         // 20 minutes
         let exp = SystemTime::now().checked_add(Duration::from_secs(MINUTES_20)).unwrap().duration_since(UNIX_EPOCH).unwrap().as_millis() as usize;
-        Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id, verified }
+        Self { email: email.to_string(), exp, iat, subj: "Login".to_string(), user_id, context, verified }
     }
 
     pub fn email(&self) -> String {
@@ -153,8 +154,9 @@ mod test_jwt {
         let login_uuid: Uuid = Uuid::new_v4();
         let envs = get_appsettings();
         let email = get_email();
+        let context = "random_str".to_string();
 
-        let token = LoginJwt::new(email, login_uuid, true).encode(&envs);
+        let token = LoginJwt::new(email, login_uuid, context,  true).encode(&envs);
         assert!(token.is_ok());
     }
 
@@ -164,8 +166,9 @@ mod test_jwt {
         let login_uuid: Uuid = Uuid::new_v4();
         let envs = get_appsettings();
         let email = get_email();
+        let context = "random_str".to_string();
 
-        let encoded_token = LoginJwt::new(email.clone(), login_uuid, true).encode(&envs).unwrap();
+        let encoded_token = LoginJwt::new(email.clone(), login_uuid, context, true).encode(&envs).unwrap();
         let decoded_token: Result<TokenData<LoginJwt>, _> = LoginJwt::decode(&encoded_token, &envs);
 
         assert!(decoded_token.is_ok());
@@ -180,8 +183,9 @@ mod test_jwt {
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
         let envs = get_appsettings();
         let email = get_email();
+        let context = "random_str".to_string();
 
-        let encoded_token = LoginJwt::new(email, login_uuid, false).encode(&envs).unwrap();
+        let encoded_token = LoginJwt::new(email, login_uuid, context, false).encode(&envs).unwrap();
         let decoded_token: TokenData<LoginJwt> = LoginJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
