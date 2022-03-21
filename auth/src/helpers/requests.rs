@@ -6,13 +6,16 @@ use redis::aio::Connection;
 use redis::{AsyncCommands};
 use rocket::http::Status;
 use rocket::request::{Outcome, Request, FromRequest};
+use derive_more;
+use uuid::Uuid;
 
 use crate::errors::app::ApiError;
 use crate::settings::config::Settings;
 use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, Jwt};
 use crate::helpers::commons::{RedisKey, RedisPrefix};
 
-pub struct Reset<'r>(&'r str);
+#[derive(Debug, derive_more::Display)]
+pub struct Reset(pub Uuid);
 
 #[derive(Debug)]
 pub enum ResetError {
@@ -22,7 +25,7 @@ pub enum ResetError {
 }
 
 
-async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Result<(), ApiError> {
+async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Result<Uuid, ApiError> {
     let token_data: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&token, &app_env.app)?;
     let user_id = token_data.claims.get_user();
     let redis_key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
@@ -30,7 +33,7 @@ async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Res
 
     if let Some(value) = key_exists {
         if value.len() > 0 && value == token {
-            return Ok(())
+            return Ok(user_id)
         }
     }
 
@@ -38,7 +41,7 @@ async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Res
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for Reset<'r> {
+impl<'r> FromRequest<'r> for Reset {
     type Error = ApiError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -60,7 +63,14 @@ impl<'r> FromRequest<'r> for Reset<'r> {
 
         match req.headers().get_one("authorization") {
             None => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
-            Some(token) if path.contains("reset") && is_valid(token, app_env, &mut conn).await.is_ok() => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
+            Some(token) if path.contains("reset") => {
+                let valid = is_valid(token, app_env, &mut conn).await;
+                if let Ok(user_id) = valid {
+                    return Outcome::Success(Reset(user_id))
+                }
+
+                Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError("")))
+            },
             Some(_) => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
         }
     }
