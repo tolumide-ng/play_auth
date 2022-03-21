@@ -30,7 +30,7 @@ mod test {
         let client = get_client().await;
         let response = client.app().post(CREATE).dispatch().await;
         assert_eq!(&response.status(), &Status::BadRequest);
-        assert_ne!(&response.content_type().unwrap(), &ContentType::JSON);
+        assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
     }
 
     #[rocket::async_test]
