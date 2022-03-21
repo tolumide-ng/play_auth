@@ -1,18 +1,15 @@
-use auth_macro::jwt::JwtHelper;
-use jsonwebtoken::TokenData;
+use rocket::patch;
 use rocket::{serde::json::Json, State};
-use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
+use uuid::Uuid;
 
 use crate::helpers::requests::Reset;
 use crate::settings::config::Settings;
 use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
 use crate::helpers::{mails::email::Email, passwords::pwd::Password};
-use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, Jwt};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;
-use crate::errors::app::ApiError;
 
 #[derive(Deserialize, Serialize)]
 pub struct User {
@@ -22,7 +19,7 @@ pub struct User {
 
 
 
-#[put("/reset", data = "<user>")]
+#[patch("/reset", data = "<user>")]
 pub async fn reset(
     guard: Reset,
     user: Json<User>,
@@ -32,7 +29,8 @@ pub async fn reset(
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     let User {email, password } = user.0;
 
-    let user_id = guard.0;
+    let id = guard.0;
+    let user_id = Uuid::parse_str(&id).unwrap();
     let mut redis_conn = redis.get_async_connection().await?;
 
     let key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();

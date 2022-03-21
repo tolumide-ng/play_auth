@@ -1,28 +1,16 @@
-use fake::Dummy;
-use rand::Rng;
 use rocket::http::{ContentType, Status};
-use rand::seq::SliceRandom;
 
 const CREATE: &'static str = "/api/v1/create";
-
-struct Pwd;
-
-impl Dummy<Pwd> for &'static str {
-    fn dummy_with_rng<R: Rng + ?Sized>(_: &Pwd, rng: &mut R) -> &'static str {
-        const VALID_PWDS: &[&str] = &["Pwd|#89*jdssd", "Anot2143@!jjdsk"];
-        VALID_PWDS.choose(rng).unwrap()
-    }
-}
 
 
 #[cfg(test)]
 mod test {
-    use fake::Fake;
-    use mockall::predicate::*;
+    // use mockall::predicate::*;
 
     use super::*;
-    use crate::helpers::app::{get_client, parse_api_response};
-    use crate::helpers::app::ResponseType;
+    use crate::helpers::app::{get_client};
+    use crate::helpers::response::{parse_api_response, ResponseType};
+    use crate::helpers::utils::{get_email, get_invalid_email, get_pwd};
 
 
     #[rocket::async_test]
@@ -37,7 +25,7 @@ mod test {
     async fn test_signup_with_no_password() {
         let client = get_client().await;
         // let response = client.app().post(CREATE).dispatch().await;
-        let email: String = fake::faker::internet::en::SafeEmail().fake();
+        let email: String = get_email();
         let req_body = serde_json::json!({
             "email": email,
         }).to_string();
@@ -54,7 +42,7 @@ mod test {
     #[rocket::async_test]
     async fn test_signup_with_no_email() {
         let client = get_client().await;
-        let password: &str = Pwd.fake();
+        let password: &str = get_pwd();
 
         let req_body = serde_json::json!({
             "password": password,
@@ -71,7 +59,7 @@ mod test {
     #[rocket::async_test]
     async fn test_does_not_provide_valid_password() {
         let client = get_client().await;
-        let email: String = fake::faker::internet::en::SafeEmail().fake();
+        let email: String = get_email();
         let password = "good_pwd";
 
         let req_body = serde_json::json!({
@@ -103,7 +91,7 @@ mod test {
     #[rocket::async_test]
     async fn test_provides_invalid_email() {
         let client = get_client().await;
-        let invalid_email: String = fake::faker::internet::en::Username().fake();
+        let invalid_email: String = get_invalid_email();
 
         let req_body = serde_json::json!({
             "email": invalid_email,
@@ -133,8 +121,8 @@ mod test {
     #[rocket::async_test]
     async fn test_crates_valid_user() {
         let client = get_client().await;
-        let email: String = fake::faker::internet::en::SafeEmail().fake();
-        let good_pwd: &str = Pwd.fake();
+        let email: String = get_email();
+        let good_pwd: &str = get_pwd();
         let req_body = serde_json::json!({
             "email": email,
             "password": good_pwd,
@@ -160,8 +148,8 @@ mod test {
     #[rocket::async_test]
     async fn test_fails_when_email_already_exists() {
         let client = get_client().await;
-        let email: String = fake::faker::internet::en::SafeEmail().fake();
-        let pwd: &str = Pwd.fake();
+        let email: String = get_email();
+        let pwd: &str = get_pwd();
 
         let req_body = serde_json::json!({
             "email": email,

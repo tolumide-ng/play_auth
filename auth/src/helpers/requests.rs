@@ -15,7 +15,7 @@ use crate::helpers::jwt_tokens::jwt::{ForgotPasswordJwt, Jwt};
 use crate::helpers::commons::{RedisKey, RedisPrefix};
 
 #[derive(Debug, derive_more::Display)]
-pub struct Reset(pub Uuid);
+pub struct Reset(pub String);
 
 #[derive(Debug)]
 pub enum ResetError {
@@ -25,15 +25,18 @@ pub enum ResetError {
 }
 
 
-async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Result<Uuid, ApiError> {
+async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Result<String, ApiError> {
+    println!(":::::::::::::::::::");
     let token_data: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&token, &app_env.app)?;
+    println!(":::::::::::::::::::**************:::::::::::::::::::");
     let user_id = token_data.claims.get_user();
     let redis_key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
     let key_exists: Option<String> = conn.get(&redis_key).await?;
+    println!(":::::::*******************::::::::::::**************:::::::::*******************::::::::::");
 
     if let Some(value) = key_exists {
         if value.len() > 0 && value == token {
-            return Ok(user_id)
+            return Ok(user_id.to_string())
         }
     }
 
@@ -45,11 +48,16 @@ impl<'r> FromRequest<'r> for Reset {
     type Error = ApiError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        println!("::::=============::::=============::::=============::::=============::::=============");
         let redis = req.rocket().state::<redis::Client>().unwrap();
+        println!("............................................................");
         let app_env = req.rocket().state::<Settings>().unwrap();
+        println!("||||||||||||||||||||||||||||||||||||||||||");
         let redis_conn = redis.get_async_connection().await;
+        println!("><<<<<<<<<<>>>>>>>>>>>>><<<<<<<<");
 
         if redis_conn.is_err() {
+            println!("@@@@@@@@@@@@@@@@@@@@@@|||||||||||@@@@@@@@@@@@@@@@@@@@@@|||||||||||");
             return Outcome::Failure((Status::InternalServerError, ApiError::InternalServerError))
         }
 
@@ -71,7 +79,7 @@ impl<'r> FromRequest<'r> for Reset {
 
                 Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError("")))
             },
-            Some(_) => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
+            Some(token) => Outcome::Success(Reset(token.to_string())),
         }
     }
 }

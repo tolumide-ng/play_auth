@@ -40,7 +40,7 @@ pub async fn forgot(
     let the_user = user.unwrap().get_user().1;
 
     let mut redis_conn = redis.get_async_connection().await?;
-    
+
     let key = RedisKey::new(RedisPrefix::Forgot, the_user).make_key();
     let forgot_pwd_exists: Result<String, RedisError> = redis_conn.get(&key).await;
 
