@@ -2,6 +2,7 @@
 
 use auth_macro::jwt::JwtHelper;
 use jsonwebtoken::TokenData;
+use redis::aio::Connection;
 use redis::{AsyncCommands};
 use rocket::http::Status;
 use rocket::request::{Outcome, Request, FromRequest};
@@ -20,11 +21,25 @@ pub enum ResetError {
     ServerError
 }
 
-// pub enum {}
+
+async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Result<(), ApiError> {
+    let token_data: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&token, &app_env.app)?;
+    let user_id = token_data.claims.get_user();
+    let redis_key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
+    let key_exists: Option<String> = conn.get(&redis_key).await?;
+
+    if let Some(value) = key_exists {
+        if value.len() > 0 && value == token {
+            return Ok(())
+        }
+    }
+
+    Err(ApiError::AuthenticationError("Authorization key is either empty of invalid"))
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Reset<'r> {
-    type Error = ResetError;
+    type Error = ApiError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let redis = req.rocket().state::<redis::Client>().unwrap();
@@ -32,48 +47,21 @@ impl<'r> FromRequest<'r> for Reset<'r> {
         let redis_conn = redis.get_async_connection().await;
 
         if redis_conn.is_err() {
-            return Outcome::Failure((Status::InternalServerError, ResetError::ServerError))
+            return Outcome::Failure((Status::InternalServerError, ApiError::InternalServerError))
         }
 
-        let mut redis_conn = redis.get_async_connection().await.unwrap();
+        let mut conn = redis.get_async_connection().await.unwrap();
 
         let path = req.uri().path().as_str().to_string();
-                        // let key_exists: Option<String> = redis_conn.get("key").await.unwrap();
-        // println!("the path {:#?}", path);
-        // let path = origin;
-        // let key = RedisKey::new(RedisPrefix::Forgot, );
 
 
 
-        fn is_valid(key: &str) -> bool {
-            key == "valid_api_key"
-        }
+       
 
         match req.headers().get_one("authorization") {
-            None => Outcome::Failure((Status::BadRequest, ResetError::Missing)),
-            Some(key) => {
-                // if is_valid(key) => 
-                if path.contains("reset") {
-                    // we can make all of them here (errors) into an enum that returns Outcome
-                    let token_data: Result<TokenData<ForgotPasswordJwt>, ApiError> = ForgotPasswordJwt::decode(&key, &app_env.app);
-
-                    if let Ok(data) = token_data {
-                        let user_id = data.claims.get_user();
-                        let redis_key = RedisKey::new(RedisPrefix::Forgot, user_id).make_key();
-                        let key_exists: Option<String> = redis_conn.get(&redis_key).await.unwrap();
-
-                        if let Some(fetched_key) = key_exists {
-                            if key == fetched_key {
-                                return Outcome::Success(Reset(key))
-                            }
-                        }
-                        
-                    }
-                    
-                }
-                return Outcome::Failure((Status::Unauthorized, ResetError::ServerError))
-            },
-            // Some(_) => Outcome::Failure((Status::BadRequest, ResetError::Invalid)),
+            None => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
+            Some(token) if path.contains("reset") && is_valid(token, app_env, &mut conn).await.is_ok() => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
+            Some(_) => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
         }
     }
 }

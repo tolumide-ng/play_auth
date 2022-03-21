@@ -9,5 +9,10 @@ pub fn internal_error() -> ApiError {
 
 #[catch(400)]
 pub fn bad_request(req: &Request) -> ApiError {
-    ApiError::BadRequest("Authorization header is either missing or invalid")
+    ApiError::BadRequest("Bad request")
+}
+
+#[catch(401)]
+pub fn unauthenticated(_req: &Request) -> ApiError {
+    ApiError::AuthenticationError("Authorization header is either missing or invalid")
 }

@@ -25,7 +25,7 @@ pub struct User {
 
 #[put("/reset", data = "<user>")]
 pub async fn reset(
-    // _guard: Reset<'_>,
+    _guard: Reset<'_>,
     user: Json<User>,
     pool: &State<Pool<Postgres>>,
     state: &State<Settings>,
