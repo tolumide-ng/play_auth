@@ -7,6 +7,11 @@ const CREATE: &'static str = "/api/v1/create";
 mod test {
     // use mockall::predicate::*;
 
+    use auth::base_repository::user::DbUser;
+    use auth::helpers::mails::email::Email;
+    use auth::helpers::passwords::pwd::Password;
+    use auth::helpers::test_helpers::get_appsettings;
+
     use super::*;
     use crate::helpers::app::{get_client};
     use crate::helpers::response::{parse_api_response, ResponseType};
@@ -148,17 +153,15 @@ mod test {
     #[rocket::async_test]
     async fn test_fails_when_email_already_exists() {
         let client = get_client().await;
-        let email: String = get_email();
-        let pwd: &str = get_pwd();
+        let email = Email::parse(get_email()).expect("error creating user email");
+        let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
 
         let req_body = serde_json::json!({
-            "email": email,
-            "password": pwd,
+            "email": email.to_string(),
+            "password": pwd.to_string(),
         }).to_string();
 
-        sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), pwd)
-        .fetch_one(client.db()).await.unwrap();
-        
+        DbUser::create_user(&client.db(), &email, pwd).await.expect("Could not create user");        
 
         let response = client.app().post(CREATE)
             .header(ContentType::JSON)
@@ -172,6 +175,6 @@ mod test {
         assert_eq!(res.message, "Conflict");
         assert_eq!(res.body, "Email already exists");
 
-        client.clean_email_in_db(email).await;
+        client.clean_email_in_db(email.to_string()).await;
     }
 }

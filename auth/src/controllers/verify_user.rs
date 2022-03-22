@@ -18,7 +18,7 @@ pub struct User {
     token: String,
 }
 
-#[put("/verify", data = "<user>" )]
+#[patch("/verify", data = "<user>" )]
 pub async fn verify(
     user: Json<User>,
     state: &State<Settings>,

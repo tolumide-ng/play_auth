@@ -3,7 +3,7 @@ mod test {
     const FORGOT: &'static str = "/api/v1/forgot";
     const MESSAGE: &'static str = "Please check your email for the link to reset your password";
 
-    use auth::{helpers::{commons::{RedisKey, RedisPrefix}, mails::email::Email, jwt_tokens::jwt::{ForgotPasswordJwt, Jwt}}, base_repository::user::DbUser};
+    use auth::{helpers::{commons::{RedisKey, RedisPrefix}, mails::email::Email, jwt_tokens::jwt::{ForgotPasswordJwt, Jwt}, passwords::pwd::Password, test_helpers::get_appsettings}, base_repository::user::DbUser};
     use rocket::http::{ContentType, Status};
     use redis::{AsyncCommands};
 
@@ -70,12 +70,12 @@ mod test {
     #[rocket::async_test]
     async fn test_new_forgot_password_request() {
         let client = get_client().await;
-        let email = get_email();
-        let pwd = get_pwd();
-        sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), pwd)
-        .fetch_one(client.db()).await.unwrap();
+        let email = Email::parse(get_email()).unwrap();
+        let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
+        DbUser::create_user(&client.db(), &email, pwd).await.unwrap();
+
         let req_body = serde_json::json!({
-            "email": email,
+            "email": email.to_string(),
         }).to_string();
 
         let response = client.app().post(FORGOT)
@@ -87,13 +87,15 @@ mod test {
         assert_eq!(body.message, "Success");
         assert_eq!(body.status, 200);
         assert_eq!(body.body, MESSAGE);
+
+        client.clean_email_in_db(email.to_string()).await;
     }
 
     #[rocket::async_test]
     async fn test_email_that_last_requested_in_the_last_one_hour() {
         let client = get_client().await;
         let email = Email::parse(get_email()).unwrap();
-        let pwd = get_pwd().to_string();
+        let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
         // create the user
         let user_id = DbUser::create_user(&client.db(), &email, pwd).await.unwrap();
         // Simulate that this user has previously requested for password change
@@ -101,7 +103,7 @@ mod test {
         let jwt = ForgotPasswordJwt::new(user_id).encode(&client.config().app).unwrap();
         let mut redis_conn = client.redis().get_async_connection().await.unwrap();
         let _res: String = redis_conn.set(&key, &jwt).await.unwrap();
-        // redis_conn.expire(&key, MINUTES_60 as usize).await?;
+        // redis_conn.expire(&key, 60).await.unwrap();
 
         let req_body = serde_json::json!({
             "email": email.to_string(),
@@ -118,5 +120,6 @@ mod test {
         assert_eq!(body.body, MESSAGE);
 
         client.clean_redis(key).await.unwrap();
+        client.clean_email_in_db(email.to_string()).await;
     }
 }
