@@ -1,4 +1,5 @@
 use std::env;
+use auth::errors::app::ApiError;
 use auth::routes::get_pool;
 use rocket::local::asynchronous::Client;
 use redis::{Client as RedisClient};
@@ -45,6 +46,13 @@ impl TestClient {
         sqlx::query(r#"DELETE FROM play_user WHERE (email=$1)"#)
             .bind(email)
             .execute(&self.db).await.unwrap();
+    }
+
+    pub async fn clean_redis(&self, key: String) -> Result<(), ApiError> {
+        let mut conn = self.redis().get_async_connection().await?;
+        redis::cmd("DEL").arg(&[&key]).query_async(&mut conn).await?;
+
+        Ok(())
     }
 }
 

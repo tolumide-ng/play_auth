@@ -42,7 +42,7 @@ pub async fn logout(
     let mut key_found = false;
     let mut checked = 0;
 
-    println!("{:#?}", current_keys);
+    // println!("{:#?}", current_keys);
 
 
     while checked != current_keys.len() && !key_found {

@@ -15,8 +15,6 @@ mod test {
     use super::{RESET};
 
 
-
-
     #[rocket::async_test]
     async fn test_invalid_authorization_header() {
         let client = get_client().await;
