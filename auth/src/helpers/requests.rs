@@ -56,6 +56,15 @@ async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection) -> Res
     Err(ApiError::AuthenticationError("Authorization header is invalid"))
 }
 
+fn is_wacthed_path(path: &str) -> bool {
+    let watched = vec!["resend_verify", "logout"];
+    let res = watched.iter().filter(|p| {
+        path.split("/").collect::<Vec<&str>>().contains(p)
+    }).collect::<Vec<&&str>>();
+
+    res.len() > 0
+}
+
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthHeader {
     type Error = ApiError;
@@ -75,7 +84,7 @@ impl<'r> FromRequest<'r> for AuthHeader {
 
         match req.headers().get_one("authorization") {
             None => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
-            Some(token) if path.contains("resend_verify") => {
+            Some(token) => {
                 let valid = is_valid(token, app_env, &mut conn).await;
                 if let Ok(info) = valid {
                     return Outcome::Success(info)
@@ -83,7 +92,7 @@ impl<'r> FromRequest<'r> for AuthHeader {
 
                 Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError("")))
             },
-            Some(_) => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
+            // Some(_) => Outcome::Failure((Status::Unauthorized, ApiError::AuthenticationError(""))),
         }
     }
 }

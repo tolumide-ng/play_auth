@@ -1,4 +1,3 @@
-use redis::{AsyncCommands};
 use rocket::{serde::json::Json, State};
 use sqlx::{Pool, Postgres};
 use uuid::Uuid;

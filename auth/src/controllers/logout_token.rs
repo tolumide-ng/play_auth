@@ -63,6 +63,6 @@ pub async fn logout(
         checked += 1;
     }
 
-    return Ok(ApiSuccess::reply_success(None));
+    return Ok(ApiSuccess::reply_success(Some("Logout Success")));
 
 }

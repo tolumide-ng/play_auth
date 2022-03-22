@@ -104,7 +104,7 @@ mod test {
         let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
         let user_id = DbUser::create_user(&client.db(), &email, pwd).await.unwrap();
         let jwt_key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
-        let jwt_value = LoginJwt::new(email, user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
+        let jwt_value = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let mut redis_conn = client.redis().get_async_connection().await.unwrap();
         let _res: Option<String> = redis_conn.set(&jwt_key, &jwt_value).await.unwrap();
 
@@ -120,5 +120,6 @@ mod test {
         assert_eq!(res.status, 200);
         assert_eq!(res.body, "Please check your email to verify your account");
         assert_eq!(res.message, "Success");
+        client.clean_email_in_db(email.to_string()).await;
     }
 }
