@@ -20,11 +20,11 @@ impl FingerPrint {
     }
 
     pub fn encoded(&self) -> String {
-        self.encoded
+        self.encoded.to_string()
     }
 
     pub fn data (&self) -> String {
-        self.data
+        self.data.to_string()
     }
 
     pub fn with(data: String, encoded: String) -> Self {

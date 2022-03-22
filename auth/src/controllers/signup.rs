@@ -5,10 +5,9 @@ use sqlx::{Postgres, Pool};
 use dotenv::dotenv;
 
 use crate::base_repository::user::DbUser;
-use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_120};
-use crate::helpers::jwt::{SignupJwt, Jwt};
-use crate::helpers::mail::MailInfo;
-use crate::helpers::{mail::{Email, MailType}, pwd::{Password}, commons::{Str, ApiResult}};
+use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_120, ApiResult};
+use crate::helpers::jwt_tokens::jwt::{SignupJwt, Jwt};
+use crate::helpers::{mails::email::{Email, MailType, MailInfo}, passwords::pwd::Password};
 use crate::{response::{ApiSuccess}, errors::app::ApiError, settings::config::Settings};
 
 
@@ -26,7 +25,7 @@ pub async fn create(
     pool: &State<Pool<Postgres>>, 
     state: &State<Settings>,
     redis: &State<redis::Client>,
-) -> ApiResult<Json<ApiSuccess<Str>>> {
+) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     dotenv().ok();
     let User {email, password} = user.0;
 

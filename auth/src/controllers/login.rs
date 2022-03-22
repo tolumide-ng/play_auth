@@ -5,13 +5,13 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Pool};
 
 use crate::helpers::commons::{RedisKey, RedisPrefix, MINUTES_20};
-use crate::helpers::jwt::{LoginJwt, Jwt};
-use crate::helpers::tokens::{Token, FingerPrint};
+use crate::helpers::jwt_tokens::jwt::{LoginJwt, Jwt};
+use crate::helpers::tokens::{FingerPrint};
 use crate::response::ApiSuccess;
 use crate::base_repository::user::DbUser;
 use crate::errors::app::ApiError;
 use crate:: settings::{config::Settings};
-use crate::helpers::{commons::{ApiResult}, pwd::Password, mail::Email};
+use crate::helpers::{commons::{ApiResult}, passwords::pwd::Password, mails::email::Email};
 
 
 #[derive(Deserialize, Serialize)]
@@ -28,7 +28,7 @@ pub async fn user_login(
     state: &State<Settings>,
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<HashMap<&'static str, String>>>> {
-    Token::new();
+    // FingerPrint::new();
 
 
     let User { email, password } = user.0;

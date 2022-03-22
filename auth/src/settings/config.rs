@@ -41,7 +41,6 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
     if app_env == AppEnv::Test {
         config_dir = base_path.join("../configuration");
-        println!("the dir {:#?}", config_dir);
     }
 
     let settings = ConfigBuilder::<DefaultState>::default()
