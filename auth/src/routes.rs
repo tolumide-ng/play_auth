@@ -4,7 +4,7 @@ use rocket::{Rocket, Build, routes, catchers};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use crate::controllers::{ create, health, user_login, forgot,
-    verify, reset, logout,
+    verify, reset, logout, resend_verify,
 };
 use crate::errors::catchers::{bad_request, internal_error};
 use crate::settings::config::Settings;
@@ -20,7 +20,8 @@ pub async fn build (config: Settings) -> Rocket<Build>{
         .manage(redis_client)
         .manage(config)
         .mount("/api/v1", routes![
-            health,  create, user_login, forgot, verify, reset, logout
+            health,  create, user_login, forgot, verify, reset, logout,
+            resend_verify,
         ])
         .register("/", catchers![bad_request, internal_error])
         // .register(catchers![not_found])

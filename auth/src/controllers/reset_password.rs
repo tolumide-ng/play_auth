@@ -5,7 +5,6 @@ use redis::{AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::helpers::requests::Reset;
 use crate::settings::config::Settings;
 use crate::helpers::commons::{ApiResult, RedisKey, RedisPrefix};
 use crate::helpers::{mails::email::Email, passwords::pwd::Password};
