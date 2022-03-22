@@ -38,7 +38,7 @@ pub enum ApiError {
     Conflict(&'static str),
     #[error("{0}")]
     AuthenticationError(&'static str),
-    #[error("Authorization Error")]
+    #[error("{0}")]
     AuthorizationError(&'static str),
     #[error("Internal Server Error")]
     InternalServerError,

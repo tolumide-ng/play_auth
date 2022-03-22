@@ -6,7 +6,7 @@ use sqlx::postgres::PgPoolOptions;
 use crate::controllers::{ create, health, user_login, forgot,
     verify, reset, logout, resend_verify,
 };
-use crate::errors::catchers::{bad_request, internal_error};
+use crate::errors::catchers::{bad_request, internal_error, unauthenticated};
 use crate::settings::config::Settings;
 use crate::settings::database::DbSettings;
 
@@ -23,7 +23,7 @@ pub async fn build (config: Settings) -> Rocket<Build>{
             health,  create, user_login, forgot, verify, reset, logout,
             resend_verify,
         ])
-        .register("/", catchers![bad_request, internal_error])
+        .register("/", catchers![bad_request, internal_error, unauthenticated])
         // .register(catchers![not_found])
 }
 

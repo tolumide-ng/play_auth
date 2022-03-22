@@ -45,7 +45,6 @@ pub async fn resend_verification_token(
             return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
         }
     }
-    // }
 
     return Err(ApiError::AuthorizationError("Invalid token"))
 }
