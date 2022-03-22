@@ -1,6 +1,7 @@
 use fake::{Dummy, Fake};
 use rand::Rng;
 use rand::seq::SliceRandom;
+use uuid::Uuid;
 
 pub struct Pwd;
 
@@ -18,8 +19,14 @@ pub fn get_pwd() -> &'static str {
 
 
 pub fn get_email() -> String {
+    let uuid = Uuid::new_v4().to_string();
+    let id = uuid.split("-").collect::<Vec<&str>>()[1];
+    // Email addresses coming out from safemail aren't unique enough for the tests and they keed clashing
     let email: String = fake::faker::internet::en::SafeEmail().fake();
-    email
+    let fragments = email.split("@").collect::<Vec<&str>>();
+    let new_email = format!("{}{}@{}", fragments[0], id, fragments[1]);
+
+    new_email
 }
 
 pub fn get_invalid_email() -> String {

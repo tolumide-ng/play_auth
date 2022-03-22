@@ -42,8 +42,6 @@ pub async fn logout(
     let mut key_found = false;
     let mut checked = 0;
 
-    // println!("{:#?}", current_keys);
-
 
     while checked != current_keys.len() && !key_found {
         let value: Result<Option<String>, RedisError> = redis_conn.get(&current_keys[checked]).await;

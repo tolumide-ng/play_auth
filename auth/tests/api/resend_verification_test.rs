@@ -48,11 +48,11 @@ mod test {
         let email = Email::parse(get_email()).unwrap();
         let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
         let user_id = DbUser::create_user(&client.db(), &email, pwd).await.unwrap();
+        client.clean_email_in_db(email.to_string()).await;
         let jwt_key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
         let jwt_value = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let mut redis_conn = client.redis().get_async_connection().await.unwrap();
         let _res: Option<String> = redis_conn.set(&jwt_key, &jwt_value).await.unwrap();
-        client.clean_email_in_db(email.to_string()).await;
 
         let response = client.app().post(RESEND)
             .header(ContentType::JSON)
@@ -67,6 +67,8 @@ mod test {
         assert_eq!(error.status, 403);
         assert_eq!(error.body, "Invalid token");
         assert_eq!(error.message, "Forbidden");
+        client.clean_email_in_db(email.to_string()).await;
+        client.clean_redis(jwt_key).await.unwrap();
     }
 
     #[rocket::async_test]
@@ -95,6 +97,7 @@ mod test {
         assert_eq!(error.body, "Invalid token");
         assert_eq!(error.message, "Forbidden");
         client.clean_email_in_db(email.to_string()).await;
+        client.clean_redis(jwt_key).await.unwrap();
     }
 
     #[rocket::async_test]
@@ -121,5 +124,6 @@ mod test {
         assert_eq!(res.body, "Please check your email to verify your account");
         assert_eq!(res.message, "Success");
         client.clean_email_in_db(email.to_string()).await;
+        client.clean_redis(jwt_key).await.unwrap();
     }
 }

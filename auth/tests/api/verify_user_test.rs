@@ -45,6 +45,7 @@ mod test {
         assert_eq!(error.status, 401);
         assert_eq!(error.body, "Token is either expired or invalid");
         assert_eq!(error.message, "Unauthorized");
+        client.clean_email_in_db(email.to_string()).await;
     }
 
     #[rocket::async_test]
@@ -72,6 +73,7 @@ mod test {
         assert_eq!(error.status, 401);
         assert_eq!(error.body, "Token is either expired or invalid");
         assert_eq!(error.message, "Unauthorized");
+        client.clean_email_in_db(email.to_string()).await;
     }
 
 
@@ -101,6 +103,6 @@ mod test {
         assert_eq!(res.status, 200);
         assert_eq!(res.body, "verified");
         assert_eq!(res.message, "Success");
-
+        client.clean_email_in_db(email.to_string()).await;
     }
 }
