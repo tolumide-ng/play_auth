@@ -88,7 +88,7 @@ mod test {
         assert_eq!(body.status, 200);
         assert_eq!(body.body, MESSAGE);
 
-        client.clean_email_in_db(email.to_string()).await;
+        client.destrory_db().await;
     }
 
     #[rocket::async_test]
@@ -120,6 +120,6 @@ mod test {
         assert_eq!(body.body, MESSAGE);
 
         client.clean_redis(key).await.unwrap();
-        client.clean_email_in_db(email.to_string()).await;
+        client.destrory_db().await;
     }
 }

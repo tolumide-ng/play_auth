@@ -3,7 +3,7 @@
 mod test {
     use auth::helpers::{commons::{RedisKey, RedisPrefix}, jwt_tokens::jwt::{LoginJwt, Jwt}, mails::email::Email};
     use redis::{AsyncCommands};
-    use rocket::http::{ContentType, Header, Status};
+    use rocket::http::{ContentType, Status};
 
     use crate::helpers::{app::get_client, utils::{get_email, get_invalid_jwt}, response::{parse_api_response, ResponseType}};
 
@@ -16,12 +16,12 @@ mod test {
         let user_id = uuid::Uuid::new_v4();
         let email = Email::parse(get_email()).unwrap();
         // Creates 2 login tokens for this user (use is logged in on 2 different browsers/devices)
-        let key_zero = RedisKey::new(RedisPrefix::Login, user_id).make_key();
+        let key_zero= format!("{}aaaaa", RedisKey::new(RedisPrefix::Login, user_id).make_key());
         let jwt_value = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let _res: Option<String> = redis_conn.set(&key_zero, &jwt_value).await.unwrap();
 
 
-        let key_one = format!("{}aaaaa", RedisKey::new(RedisPrefix::Login, user_id).make_key());
+        let key_one = format!("{}bbbb", RedisKey::new(RedisPrefix::Login, user_id).make_key());
         let token = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let _res: Option<String> = redis_conn.set(&key_one, &token).await.unwrap();
 
@@ -41,7 +41,7 @@ mod test {
         if let Ok( res ) =  parse_api_response(response, ResponseType::Success).await {
             assert_eq!(res.status, 200);
             assert_eq!(res.message, "Success");
-            client.clean_email_in_db(email.to_string()).await;
+            client.destrory_db().await;
         } else {
             assert!(false)
         }
@@ -52,7 +52,11 @@ mod test {
         assert!(not_logged_out_device.is_some());
         assert!(logged_out_device.is_none());
 
-        client.clean_email_in_db(email.to_string()).await;
+        client.destrory_db().await;
+        assert!(false);
+        // client.drop_db().await;
+        client.clean_redis(key_zero.to_string()).await.unwrap();
+        client.clean_redis(key_one.to_string()).await.unwrap();
     }
 
     #[rocket::async_test]
@@ -81,7 +85,7 @@ mod test {
         if let Ok( res ) =  parse_api_response(response, ResponseType::Success).await {
             assert_eq!(res.status, 200);
             assert_eq!(res.message, "Success");
-            client.clean_email_in_db(email.to_string()).await;
+            client.destrory_db().await;
         } else {
             assert!(false)
         }

@@ -38,7 +38,7 @@ impl RedisKey {
         let mut key =  format!("{}__{}", &self.prefix, &self.user_id);
 
         if self.prefix == RedisPrefix::Login {
-            let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+            let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis();
             key = format!("{}__{}", key, time);
         }
 

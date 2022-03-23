@@ -15,7 +15,7 @@ use crate::{settings::{app::AppSettings}, errors::app::ApiError};
 #[path = "./pwd.test.rs"]
 mod pwd_tests;
 
-#[derive(derive_more::Display, Debug)]
+#[derive(derive_more::Display, Debug, Clone)]
 pub struct Password(#[display(fmt = "{0}")]String);
 
 

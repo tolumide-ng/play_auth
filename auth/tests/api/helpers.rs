@@ -1,3 +1,4 @@
 pub mod app;
-pub mod utils;
+pub mod db;
 pub mod response;
+pub mod utils;

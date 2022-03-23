@@ -41,7 +41,7 @@ mod test {
         
         assert_eq!(&response.status(), &Status::UnprocessableEntity);
         assert_eq!(&response.content_type().unwrap(), &ContentType::HTML);
-        client.clean_email_in_db(email).await;
+        // client.destrory_db().await;
     }
 
     #[rocket::async_test]
@@ -88,8 +88,7 @@ mod test {
         } else {
             assert!(false);
         }
-        
-        client.clean_email_in_db(email).await;
+        // client.destrory_db().await;
     }
 
 
@@ -120,7 +119,7 @@ mod test {
             assert!(false);
         }
         
-        client.clean_email_in_db(invalid_email).await;
+        // client.destrory_db().await;
     }
 
     #[rocket::async_test]
@@ -147,7 +146,7 @@ mod test {
             assert!(false)
         }
 
-        client.clean_email_in_db(email).await;
+        // client.destrory_db().await;
     }
 
     #[rocket::async_test]
@@ -175,6 +174,6 @@ mod test {
         assert_eq!(res.message, "Conflict");
         assert_eq!(res.body, "Email already exists");
 
-        client.clean_email_in_db(email.to_string()).await;
+        // client.destrory_db().await;
     }
 }
