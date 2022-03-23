@@ -42,16 +42,16 @@ pub async fn logout(
     let mut key_found = false;
     let mut checked = 0;
 
-    // println!("{:#?}", current_keys);
-
 
     while checked != current_keys.len() && !key_found {
         let value: Result<Option<String>, RedisError> = redis_conn.get(&current_keys[checked]).await;
 
         match value {
             Ok(val)  => {
+                println!("********************************************* {:#?}", &current_keys[checked]);
                 if let Some(v) = val {
                     if v == token {
+                        println!(":::::::::::::::::: {:#?} :::::::::::::::::::::", &current_keys[checked]);
                         redis_conn.del(&current_keys[checked]).await?;
                         key_found = true;
                     }
@@ -63,6 +63,6 @@ pub async fn logout(
         checked += 1;
     }
 
-    return Ok(ApiSuccess::reply_success(None));
+    return Ok(ApiSuccess::reply_success(Some("Logout Success")));
 
 }

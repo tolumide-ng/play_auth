@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 use argon2::Error as PError;
 // use argon2::password_hash::Error;
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ErrorResponse {
     #[serde(rename = "error")]
@@ -39,7 +38,7 @@ pub enum ApiError {
     Conflict(&'static str),
     #[error("{0}")]
     AuthenticationError(&'static str),
-    #[error("Authorization Error")]
+    #[error("{0}")]
     AuthorizationError(&'static str),
     #[error("Internal Server Error")]
     InternalServerError,
@@ -51,6 +50,8 @@ pub enum ApiError {
     UnverifiedAccount,
     #[error("Authentication Error")]
     Base64Error(#[from] B64Error),
+    #[error("Token is either expired or invalid")]
+    UuidError(#[from] uuid::Error)
     
     // #[error(transparent)]
     // UnexpectedError(#[from] anyhow::Error),
@@ -64,7 +65,7 @@ impl ApiError {
         match self {
             ValidationError(_) | BadRequest(_) => Status::BadRequest,
             DatabaseError(_) | PasswordError(_) | RedisError(_) | InternalServerError => Status::InternalServerError,
-            JwtError(_) | AuthenticationError(_) | Base64Error(_) => Status::Unauthorized,
+            JwtError(_) | UuidError(_) | AuthenticationError(_) | Base64Error(_) => Status::Unauthorized,
             Conflict(_) => Status::Conflict,
             AuthorizationError(_) | UnverifiedAccount => Status::Forbidden,
         }

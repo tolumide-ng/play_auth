@@ -57,8 +57,8 @@ impl DbUser {
         }
     }
 
-    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: String) -> DbResult<Uuid> {
-        let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash)
+    pub async fn create_user(pool: &Pool<Postgres>, email: &ValidEmail, hash: Password) -> DbResult<Uuid> {
+        let user = sqlx::query!(r#"INSERT INTO play_user (email, hash) VALUES ($1, $2) RETURNING user_id"#, email.to_string(), hash.to_string())
             .fetch_one(pool).await;
 
         if let Err(e) = user {

@@ -16,32 +16,40 @@ mod test {
 
 
     #[rocket::async_test]
-    async fn test_invalid_authorization_header() {
+    async fn test_invalid_no_request_body() {
         let client = get_client().await;
         let response = client.app().patch(RESET)
             .header(ContentType::JSON)
             .header(Header::new("Authorization", get_invalid_jwt()))
             .dispatch().await;
 
-        assert_eq!(&response.status(), &Status::Unauthorized);
+        assert_eq!(&response.status(), &Status::BadRequest);
         assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
     }
 
     #[rocket::async_test]
-    async fn test_no_authorization_header() {
+    async fn test_request_with_invalid_token() {
         let client = get_client().await;
+        let req_body = serde_json::json!({
+            "email": get_email(),
+            "password": get_pwd(),
+            "token": get_invalid_jwt(),
+        }).to_string();
+
         let response = client.app().patch(RESET)
             .header(ContentType::JSON)
+            .body(req_body)
             .dispatch().await;
 
+            
         assert_eq!(&response.status(), &Status::Unauthorized);
         assert_eq!(&response.content_type().unwrap(), &ContentType::JSON);
-
+        
         if let Err(res) = parse_api_response(response, ResponseType::Error).await {
             let body = res.error;
 
             assert_eq!(body.status, 401);
-            assert!(body.body.contains("Authorization header is either missing or invalid"));
+            assert!(body.body.contains("Token is either expired or invalid"));
             assert_eq!(body.message, "Unauthorized".to_string());
         } else {
             assert!(false)
@@ -61,11 +69,11 @@ mod test {
         let req_body = serde_json::json!({
             "email": get_email(),
             "password": get_pwd(),
+            "token": jwt,
         }).to_string();
 
         let response = client.app().patch(RESET)
             .header(ContentType::JSON)
-            .header(Header::new("Authorization", jwt))
             .body(req_body)
             .dispatch().await;
 

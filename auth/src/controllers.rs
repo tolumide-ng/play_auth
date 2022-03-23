@@ -14,4 +14,4 @@ pub use forgot_password::forgot;
 pub use verify_user::verify;
 pub use reset_password::reset;
 pub use logout_token::logout;
-pub use resend_verification::resend_verification_token;
+pub use resend_verification::resend_verification_token as resend_verify;

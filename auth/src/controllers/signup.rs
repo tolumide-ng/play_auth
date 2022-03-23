@@ -37,7 +37,7 @@ pub async fn create(
     let mut redis_conn = redis.get_async_connection().await?;
 
     if user_already_exists.is_none() {
-        let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd.to_string()).await?;
+        let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
         let jwt = SignupJwt::new(user_id).encode(&state.app)?;
 
         let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
