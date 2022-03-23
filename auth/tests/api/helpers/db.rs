@@ -31,7 +31,17 @@ impl TestDb {
         println!("CLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSE {:#?}", &database_name);
         let url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
 
-        sqlx::postgres::Postgres::drop_database(&url).await?;
+        let mut conn = PgConnection::connect_with(&config.with_db())
+            .await.expect("");
+
+        // let query = format!("DROP DATABASE IF EXISTS \"{}\"", database_name);
+        let query = format!("select pg_terminate_backend(pid) from pg_stat_activity where datname='{}';", database_name);
+
+        let _ = conn
+            .execute(&*query).await.unwrap();
+
+        // sqlx::postgres::Postgres::drop_database(&url).await?;
+        // let mut connection = PgConnection
         
         Ok(())
     }

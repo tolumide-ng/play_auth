@@ -45,7 +45,7 @@ mod test {
         assert_eq!(error.status, 401);
         assert_eq!(error.body, "Token is either expired or invalid");
         assert_eq!(error.message, "Unauthorized");
-        client.destrory_db().await;
+        // client.destrory_db().await;
     }
 
     #[rocket::async_test]
@@ -73,7 +73,7 @@ mod test {
         assert_eq!(error.status, 401);
         assert_eq!(error.body, "Token is either expired or invalid");
         assert_eq!(error.message, "Unauthorized");
-        client.destrory_db().await;
+        // client.destrory_db().await;
     }
 
 
@@ -103,7 +103,7 @@ mod test {
         assert_eq!(res.status, 200);
         assert_eq!(res.body, "verified");
         assert_eq!(res.message, "Success");
-        client.destrory_db().await;
+        // client.destrory_db().await;
         client.clean_redis(jwt_key).await.unwrap();
     }
 }

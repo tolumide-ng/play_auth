@@ -41,15 +41,11 @@ mod test {
         let res = response.into_bytes().await.unwrap();
         let b_res: Value = serde_json::from_slice(&res).unwrap();
         let body: LoginResponse = serde_json::from_value(b_res).unwrap();
-        println!("::::::::::::::::::::::::::::::::::::::::::");
         assert_eq!(body.status, 200);
-        println!("::::::::::::::::::::::::::::::::::::::::::>>>>>>>>>>>>>>>>>>>");
         assert_eq!(body.message, "Success");
         assert!(body.body.get("jwt").is_some());
         assert!(body.body.get("jwt").is_some());
-        println!("::::::::::::::::::::::::::::::::::::::::::>>>>>>>>>>>>>>>>>>>|||||||||||||||<<<<<<<<<<<<<<<");
-        println!("|||||||||||||||||| {:#?}", body);
-        client.destrory_db().await;
+        // client.destrory_db().await;
         client.clean_redis(jwt_key).await.unwrap();
     }
 
@@ -104,7 +100,7 @@ mod test {
         assert_eq!(error.status, 401);
         assert_eq!(error.message, "Unauthorized");
         assert_eq!(error.body, "Email or Password does not match");
-        client.destrory_db().await;
+        // client.destrory_db().await;
         client.clean_redis(user_id.to_string()).await.unwrap()
     }
 }

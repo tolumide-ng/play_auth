@@ -46,8 +46,7 @@ mod test {
         // User requests for verification, deletes their account and tries to use the email they got earlier for verification
         let client = get_client().await;
         let email = Email::parse(get_email()).unwrap();
-        let pwd = Password::new(get_pwd().to_string(), &get_appsettings()).unwrap();
-        let user_id = DbUser::create_user(&client.db(), &email, pwd).await.unwrap();
+        let user_id = uuid::Uuid::new_v4();
         let jwt_key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
         let jwt_value = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let mut redis_conn = client.redis().get_async_connection().await.unwrap();
@@ -66,7 +65,7 @@ mod test {
         assert_eq!(error.status, 403);
         assert_eq!(error.body, "Invalid token");
         assert_eq!(error.message, "Forbidden");
-        client.destrory_db().await;
+        // client.destrory_db().await;
         client.clean_redis(jwt_key).await.unwrap();
     }
 
@@ -95,7 +94,7 @@ mod test {
         assert_eq!(error.status, 403);
         assert_eq!(error.body, "Invalid token");
         assert_eq!(error.message, "Forbidden");
-        client.destrory_db().await;
+        // client.destrory_db().await;
         client.clean_redis(jwt_key).await.unwrap();
     }
 
@@ -122,7 +121,7 @@ mod test {
         assert_eq!(res.status, 200);
         assert_eq!(res.body, "Please check your email to verify your account");
         assert_eq!(res.message, "Success");
-        client.destrory_db().await;
+        // client.destrory_db().await;
         // client.clean_redis(jwt_key).await.unwrap();
     }
 }

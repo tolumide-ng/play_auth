@@ -41,7 +41,7 @@ mod test {
         if let Ok( res ) =  parse_api_response(response, ResponseType::Success).await {
             assert_eq!(res.status, 200);
             assert_eq!(res.message, "Success");
-            client.destrory_db().await;
+            // client.destrory_db().await;
         } else {
             assert!(false)
         }
@@ -52,8 +52,7 @@ mod test {
         assert!(not_logged_out_device.is_some());
         assert!(logged_out_device.is_none());
 
-        client.destrory_db().await;
-        assert!(false);
+        // client.destrory_db().await;
         // client.drop_db().await;
         client.clean_redis(key_zero.to_string()).await.unwrap();
         client.clean_redis(key_one.to_string()).await.unwrap();
@@ -85,7 +84,7 @@ mod test {
         if let Ok( res ) =  parse_api_response(response, ResponseType::Success).await {
             assert_eq!(res.status, 200);
             assert_eq!(res.message, "Success");
-            client.destrory_db().await;
+            // client.destrory_db().await;
         } else {
             assert!(false)
         }
