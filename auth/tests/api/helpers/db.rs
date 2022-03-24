@@ -5,7 +5,6 @@ pub struct TestDb;
 
 impl TestDb {
     pub async fn create_db(config: &DbSettings) -> PgPool {
-        println!("\n\n |||||||||||||THE DATABASE NAME {:#?} \n||||||||||||||||||||| \n\n ", &config.database_name);
         let mut connection = PgConnection::connect_with(&config.without_db())
             .await
             .expect("Failed to connect to postgres");
@@ -28,7 +27,6 @@ impl TestDb {
 
         db_pool.close().await;
         let DbSettings { host, port, username, password, database_name, .. } = &config;
-        println!("CLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSE {:#?}", &database_name);
         let url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
 
         let mut conn = PgConnection::connect_with(&config.with_db())

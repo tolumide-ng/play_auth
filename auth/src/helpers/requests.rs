@@ -45,20 +45,11 @@ pub enum AuthHeaderError {
 
 async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection, pool: &Pool<Postgres>) -> Result<AuthHeader, ApiError> {
     let token_data: TokenData<LoginJwt> = LoginJwt::decode(&token, &app_env.app)?;
-    println!(":::");
     let data = token_data.claims;
     let user_id = data.get_user();
     let email = Email::parse(data.email())?;
 
-    println!("::::::::::::::::::::::::::::: USER ID {:#?}", user_id);
-    // let redis_key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
-    // println!("<<<<<<<<<<<<< {:#?}", redis_key);
-    // let key_exists: Option<String> = conn.get(&redis_key).await?;
-    // println!(":::::::::::: {:#?}", key_exists);
-
-    // if let Some(value) = key_exists {
     if DbUser::email_exists(&pool, &email).await.is_ok() {
-        println!("::::::::::::::::::::::::::::::::::::::::::::::::");
         return Ok(AuthHeader::new(data.email(), data.get_user().to_string()));
     }
 

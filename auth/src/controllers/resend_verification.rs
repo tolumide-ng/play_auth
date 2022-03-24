@@ -26,13 +26,9 @@ pub async fn resend_verification_token(
 
 
     let mut redis_conn = redis.get_async_connection().await?;
-    let the_user = DbUser::email_exists(&pool, &email).await?;
-
-    println!(":::::::::::<<<<<<<<<<<");
-    
+    let the_user = DbUser::email_exists(&pool, &email).await?;    
     
     if let Some(user) = the_user {
-        println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Remove any currently active signup token for this user
         let signup_key = format!("{}:*", RedisKey::new(RedisPrefix::Signup, user_id).make_key());
         redis::cmd("DEL").arg(&[&signup_key]).query_async(&mut redis_conn).await?;
@@ -40,7 +36,6 @@ pub async fn resend_verification_token(
         if !user.is_verified() {
             // let id = Uuid::parse_str(user.get_user().as_str());
             let signup_token = SignupJwt::new(user.get_user().1).encode(&state.app)?;
-            println!("JWRT!!!! {:#?}", signup_token);
             let info = MailInfo::new(signup_token, &state.app.frontend_url);
             let mail_type = MailType::Signup(info);
             Email::new(email, None, mail_type).send_email(&state.email);
