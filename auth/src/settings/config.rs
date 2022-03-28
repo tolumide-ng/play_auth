@@ -48,6 +48,11 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(config::File::from(config_dir.join(app_env.to_string())).required(true))
         .add_source(Environment::with_prefix("app").separator("__"))
         .add_source(Environment::with_prefix(&app_env.to_string()).separator("__"));
+    
+    let apps = Environment::with_prefix("app").separator("__");
+        println!("for apps {:#?}", apps);
+    let envssss = Environment::with_prefix(&app_env.to_string()).separator("__");
+        println!("FOR APP_ENVS>>>>>>>>>>>>>>> {:#?}", envssss);
 
     settings.build()?.try_deserialize()
 }

@@ -63,6 +63,7 @@ impl DbUser {
 
         if let Err(e) = user {
             // todo!() - tracing!
+            println!("THIS IS THE ERROR!!!!!!! {:#?}", e);
             return Err(ApiError::DatabaseError(e))
         }
 

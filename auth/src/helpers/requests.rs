@@ -46,7 +46,7 @@ pub enum AuthHeaderError {
 async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection, pool: &Pool<Postgres>) -> Result<AuthHeader, ApiError> {
     let token_data: TokenData<LoginJwt> = LoginJwt::decode(&token, &app_env.app)?;
     let data = token_data.claims;
-    let user_id = data.get_user();
+    let _user_id = data.get_user();
     let email = Email::parse(data.email())?;
 
     if DbUser::email_exists(&pool, &email).await.is_ok() {

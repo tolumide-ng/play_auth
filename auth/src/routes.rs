@@ -11,6 +11,7 @@ use crate::settings::config::Settings;
 use crate::settings::database::DbSettings;
 
 pub async fn build (config: Settings) -> Rocket<Build>{
+    println!("CALLING BYULD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {:#?} \n\n\n\n", config);
     let db_pool = get_pool(&config.db);
     let redis_client = redis::Client::open(&*config.redis_uri).expect("Unable to establish connection to redis");
 
@@ -30,6 +31,8 @@ pub async fn build (config: Settings) -> Rocket<Build>{
 
 
   pub fn get_pool(config: &DbSettings) -> PgPool {
+      println!("<THE CONFIG {:#?}>", config);
+
         PgPoolOptions::new()
             .connect_timeout(Duration::from_secs(30))
             .connect_lazy_with(config.with_db())

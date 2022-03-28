@@ -8,8 +8,8 @@ db:
 app:
   port: 8000
   env: local
-  m_cost: 15000
-  p_cost: 1
+  m_cost: 17000
+  p_cost: 3
   t_cost: 2
   jwt_secret: aSampleYUIJWTYIOLSNDKLSECZZRETdsjk9210921secret
   frontend_url: "https://samplefrontendurl.com"

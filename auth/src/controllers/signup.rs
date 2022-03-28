@@ -26,17 +26,25 @@ pub async fn create(
     state: &State<Settings>,
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
+    println!(":::::::::::::::::");
     dotenv().ok();
+    println!(":::::::::::::::::<>>>>>>>>>>>>>>>>");
     let User {email, password} = user.0;
+    println!("::::::::::::::::: {:#?} {:#?}", email, password);
 
     let parsed_email = Email::parse(email)?;
+    println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
+    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
+    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
     let mut redis_conn = redis.get_async_connection().await?;
+    println!("***********************************************");
 
     if user_already_exists.is_none() {
+        println!("!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
         let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
         let jwt = SignupJwt::new(user_id).encode(&state.app)?;
 

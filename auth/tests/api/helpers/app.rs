@@ -69,7 +69,7 @@ fn get_test_config() -> Settings {
         let db_name = Uuid::new_v4().to_string();
         let mut app_config = get_configuration().expect("Failed to read configuration file");
         app_config.db.database_name = db_name;
-        env::remove_var("app__db__database_name");
+        // env::remove_var("app__db__database_name");
         app_config
     };
     return config;
