@@ -18,7 +18,10 @@ services:
             POSTGRES_HOST: ${DB_HOST}
             POSTGRES_NAME: ${DB_NAME}
     web:
-        build: ./
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            target: builder
         depends_on:
             - db
             - redis

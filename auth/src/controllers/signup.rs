@@ -26,16 +26,16 @@ pub async fn create(
     state: &State<Settings>,
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
-    println!(":::::::::::::::::");
+    // println!(":::::::::::::::::");
     dotenv().ok();
-    println!(":::::::::::::::::<>>>>>>>>>>>>>>>>");
+    // println!(":::::::::::::::::<>>>>>>>>>>>>>>>>");
     let User {email, password} = user.0;
     println!("::::::::::::::::: {:#?} {:#?}", email, password);
 
     let parsed_email = Email::parse(email)?;
-    println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
+    // println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
-    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    // println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

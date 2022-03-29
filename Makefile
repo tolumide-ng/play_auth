@@ -20,3 +20,19 @@ update_migrations:
 .PHONY: Run all tests (adding the arguments --features "tests" allows all integration test features to be implemnted)
 test_all:
 	cargo test -p auth --features "test"
+
+.PHONY: Run application with docker compose in non-production environment (development, testing, staging) rebuild images
+play_dev_build:
+	docker compose up --build
+
+.PHONY: Run application with docker compose in non-production environment (development, testing, staging)
+play_dev:
+	docker compose up
+
+.PHONY: Run application with docker compose in production (rebuild images)
+play_prod_build:
+	docker compose -f docker-compose.prod.yml up --build
+
+.PHONY: Run application with docker compose in production
+play_prod:
+	docker compose -f docker-compose.prod.yml up
