@@ -1,51 +1,9 @@
-# version: "3.9"
+version: "3.9"
 
-# services:
-#     web:
-#         build:
-#             context: ./
-#             dockerfile: Dockerfile
-#             # target: builder
-#         depends_on:
-#             - db
-#             - redis
-#         ports:
-#           - 8000:8000
-#         networks:
-#             - webnet
-#         restart: on-failure:2
-#         # volumes:
-#         #     - ./:/usr/src/app
-#         environment:
-#             app__db__username: ${DB_USERNAME}
-#             app__db__password: ${DB_PASSWORD}
-#             app__db__port: ${DB_PORT}
-#             app__db__host: ${DB_HOST}
-#             app__db__name: ${DB_NAME}
-#             app__db__require_ssl: ${DB_SSL}
-#             app__email__smtp_server: ${SMTP_SERVER}
-#             app__email__smtp_user: ${SMTP_USER}
-#             app__email__smtp_pass: ${SMTP_PASS}
-#             app__app_env: ${APP_ENV}
-#             app__app__m_cost: ${M_COST}
-#             app__app__t_cost: ${T_COST}
-#             app__app__p_cost: ${P_COST}
-#             app__app__port: ${APP_PORT}
-#             app__app_name: ${APP_NAME}
-#             app__redis_uri: ${REDIS_URI}
-#             app__app__frontend_url: ${FRONTEND_URL}
-#             app__app__jwt_secret: ${JWT_SECRET}
-
-
-
-
-# # version: "3.9"
-
-# # services:
-# #   web:
-# #     build:
-# #       context: ./
-# #       dockerfile: Dockerfile
-# #       target: dev
-# #     volumes:
-# #       - ./:/usr/src/app
+services:
+    web:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            target: prod
+        # command: ["cargo", "run"]

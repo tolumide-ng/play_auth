@@ -21,17 +21,22 @@ update_migrations:
 test_all:
 	cargo test -p auth --features "test"
 
-.PHONY: Run application with docker compose in non-production environment (development, testing, staging) rebuild images
-play_dev_build:
-	docker compose up --build
+.PHONY: Build docker image for non-production environment (development, testing, staging)
+play_build_dev:
+	docker build . -t authey_dev --target=dev
 
-.PHONY: Run application with docker compose in non-production environment (development, testing, staging)
+# .PHONY: Docker compose application in non-production env
+# play_compose_dev:
+# 	docker compose up --build
+
+.PHONY: Docker compose application in non-production environment (development, testing, staging)
 play_dev:
 	docker compose up
 
-.PHONY: Run application with docker compose in production (rebuild images)
-play_prod_build:
-	docker compose -f docker-compose.prod.yml up --build
+.PHONY: Build docker image for production environment
+play_build_prod:
+	# docker build 
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 .PHONY: Run application with docker compose in production
 play_prod:

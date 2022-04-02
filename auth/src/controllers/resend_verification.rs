@@ -35,7 +35,7 @@ pub async fn resend_verification_token(
 
         if !user.is_verified() {
             // let id = Uuid::parse_str(user.get_user().as_str());
-            let signup_token = SignupJwt::new(user.get_user().1).encode(&state.app)?;
+            let signup_token = SignupJwt::new(user.get_user().user_id).encode(&state.app)?;
             let info = MailInfo::new(signup_token, &state.app.frontend_url);
             let mail_type = MailType::Signup(info);
             Email::new(email, None, mail_type).send_email(&state.email);

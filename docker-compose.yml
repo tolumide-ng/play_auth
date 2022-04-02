@@ -18,10 +18,6 @@ services:
             POSTGRES_HOST: ${DB_HOST}
             POSTGRES_NAME: ${DB_NAME}
     web:
-        build:
-            context: ./
-            dockerfile: Dockerfile
-            target: builder
         depends_on:
             - db
             - redis
@@ -29,9 +25,8 @@ services:
           - 8000:8000
         networks:
             - webnet
-        restart: on-failure:2
-        # volumes:
-        #     - ./:/usr/src/app
+        links:
+          - db
         environment:
             app__db__username: ${DB_USERNAME}
             app__db__password: ${DB_PASSWORD}
@@ -54,5 +49,8 @@ services:
 networks:
     webnet:
 volumes:
+    # cargo:
+    # target-cache:
+    # cargo-cache:
     pgdata:
     static_volume:

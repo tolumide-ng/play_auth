@@ -33,9 +33,9 @@ pub async fn create(
     println!("::::::::::::::::: {:#?} {:#?}", email, password);
 
     let parsed_email = Email::parse(email)?;
-    // println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
+    println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
-    // println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

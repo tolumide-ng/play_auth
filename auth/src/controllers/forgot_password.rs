@@ -2,6 +2,7 @@ use redis::{RedisError, AsyncCommands};
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
+use uuid::Uuid;
 
 
 use crate::settings::config::Settings;
@@ -37,7 +38,7 @@ pub async fn forgot(
         return Ok(ApiSuccess::reply_success(Some(MESSAGE.to_string())))
     }
 
-    let the_user = user.unwrap().get_user().1;
+    let the_user = user.unwrap().get_user().user_id;
 
     let mut redis_conn = redis.get_async_connection().await?;
 

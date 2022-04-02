@@ -7,11 +7,9 @@ EXPOSE 8000
 # -------------------------------------
 FROM base AS dev
 RUN cargo install cargo-watch
-ENV SQLX_OFFLINE true
-# WORKDIR /usr/src/app
+WORKDIR /usr/src/app
+COPY . .
 
-# VOLUME [ "/usr/src/app/cargo" ]
-CMD ["cargo", "watch", "-x", "run", "-p", "auth"]
 
 
 # -------------------------------------
@@ -23,7 +21,6 @@ COPY . ./
 RUN cargo build --release -p auth \
     && rm src/*.rs target/release/deps/auth*
 
-FROM debian:buster-slim AS debian
 ARG APP=/usr/src/app
 
 RUN apt-get update \

@@ -41,8 +41,8 @@ pub async fn user_login(
     if let Some(db_user) = user {
         if Password::is_same(db_user.get_hash(), password) {
             let context = FingerPrint::new();
-            let info: (String, uuid::Uuid) = db_user.get_user();
-            let user_id = info.1;
+            let info = db_user.get_user();
+            let user_id = info.user_id;
             let jwt = LoginJwt::new(parsed_email, user_id, context.encoded(), db_user.is_verified()).encode(&state.app)?;
 
             let mut redis_conn = redis.get_async_connection().await?;

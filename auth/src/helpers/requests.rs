@@ -13,7 +13,7 @@ use crate::errors::app::ApiError;
 use crate::helpers::mails::email::Email;
 use crate::settings::config::Settings;
 use crate::helpers::jwt_tokens::jwt::{LoginJwt, Jwt};
-use crate::helpers::commons::{RedisKey, RedisPrefix};
+// use crate::helpers::commons::{RedisKey, RedisPrefix};
 
 
 #[derive(Debug)]
@@ -56,14 +56,15 @@ async fn is_valid(token: &str, app_env: &Settings, conn: &mut Connection, pool: 
     Err(ApiError::AuthenticationError("Authorization header is invalid"))
 }
 
-fn is_wacthed_path(path: &str) -> bool {
-    let watched = vec!["resend_verify", "logout"];
-    let res = watched.iter().filter(|p| {
-        path.split("/").collect::<Vec<&str>>().contains(p)
-    }).collect::<Vec<&&str>>();
+// fn is_wacthed_path(path: &str) -> bool {
+//     let watched = vec!["resend_verify", "logout"];
+//     let res = watched.iter().filter(|p| {
+//         path.split("/").collect::<Vec<&str>>().contains(p)
+//     }).collect::<Vec<&&str>>();
+//     println!("talking!");  
 
-    res.len() > 0
-}
+//     res.len() > 0
+// }
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthHeader {

@@ -12,7 +12,7 @@ pub struct DbUser;
 
 #[derive(Debug)]
 pub struct User {
-    user_id: Uuid,
+    pub user_id: Uuid,
     hash: String,
     email: String,
     verified: bool,
@@ -21,7 +21,7 @@ pub struct User {
     updated_at: chrono::NaiveDateTime,
 }
 
-struct UserInfo {
+pub struct UserInfo {
     pub email: String,
     pub user_id: Uuid,
 }
@@ -31,12 +31,19 @@ impl User {
         self.hash.clone()
     }
 
-    pub fn get_user(&self) -> (String, Uuid) {
-        (self.email.clone(), self.user_id.clone())
+    pub fn get_user(&self) -> UserInfo {
+        UserInfo {
+            email: self.email.clone(),
+            user_id: self.user_id.clone(),
+        }
     }
 
     pub fn is_verified(&self) -> bool {
         self.verified
+    }
+
+    pub fn get(&self) -> &Self {
+        self
     }
 
 }
@@ -78,6 +85,7 @@ impl DbUser {
             .await;
 
         if let Err(e) = res {
+            println!("$$$$$$$$$$$$***********$$$$$$$$$$$$$$$$$$$$$$$$***********$$$$$$$$$$$$ {:#?}", e);
             return match e {
                 RowNotFound => {Ok(None)},
                 _ => {Err(ApiError::DatabaseError(e))}
