@@ -35,12 +35,12 @@ pub async fn create(
     let parsed_email = Email::parse(email)?;
     println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
-    println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    // println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-    let mut redis_conn = redis.get_async_connection().await?;
+    let mut redis_conn = redis.get_async_connection().await.unwrap();
     println!("***********************************************");
 
     if user_already_exists.is_none() {

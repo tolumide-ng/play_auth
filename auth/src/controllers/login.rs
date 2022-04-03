@@ -24,6 +24,8 @@ pub struct User {
 #[post("/login", data = "<user>")]
 pub async fn user_login(
     user: Json<User>,
+
+    
     pool: &State<Pool<Postgres>>,
     state: &State<Settings>,
     redis: &State<redis::Client>,

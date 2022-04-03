@@ -4,13 +4,13 @@ ENV SQLX_OFFLINE true
 ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
 RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
+CMD ["sqlx migrate --source=auth run"]
 
 # -------------------------------------
 FROM base AS dev
 RUN cargo install cargo-watch
 WORKDIR /usr/src/app
 COPY . .
-
 
 
 # -------------------------------------
