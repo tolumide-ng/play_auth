@@ -3,8 +3,8 @@ FROM rust:1.59.0 AS base
 ENV SQLX_OFFLINE true
 ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
-RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
-CMD ["sqlx migrate --source=auth run"]
+# RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
+# CMD ["sqlx migrate --source=auth run"]
 
 # -------------------------------------
 FROM base AS dev

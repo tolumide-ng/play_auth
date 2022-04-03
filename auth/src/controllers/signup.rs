@@ -34,6 +34,11 @@ pub async fn create(
 
     let parsed_email = Email::parse(email)?;
     println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
+
+
+
+
+    
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
     // println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 

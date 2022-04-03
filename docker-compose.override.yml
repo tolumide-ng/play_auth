@@ -8,8 +8,8 @@ services:
             dockerfile: Dockerfile
             target: dev
         volumes:
-          - ".:/usr/src/app"
+          - .:/usr/src/app
         command: ["cargo", "watch", "-x", "run", "-p", "auth"]
         
-volumes:
-    target-cache:
+# volumes:
+    # target-cache:
