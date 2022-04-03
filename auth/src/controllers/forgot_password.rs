@@ -2,7 +2,6 @@ use redis::{RedisError, AsyncCommands};
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use uuid::Uuid;
 
 
 use crate::settings::config::Settings;

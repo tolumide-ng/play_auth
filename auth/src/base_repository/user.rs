@@ -15,10 +15,10 @@ pub struct User {
     user_id: Uuid,
     hash: String,
     email: String,
-    username: Option<String>,
     verified: bool,
-    created_at: chrono::NaiveDateTime,
-    updated_at: chrono::NaiveDateTime,
+    pub username: Option<String>,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
 }
 
 pub struct UserInfo {
@@ -69,8 +69,6 @@ impl DbUser {
             .fetch_one(pool).await;
 
         if let Err(e) = user {
-            // todo!() - tracing!
-            println!("THIS IS THE ERROR!!!!!!! {:#?}", e);
             return Err(ApiError::DatabaseError(e))
         }
 
@@ -85,7 +83,6 @@ impl DbUser {
             .await;
 
         if let Err(e) = res {
-            println!("$$$$$$$$$$$$***********$$$$$$$$$$$$$$$$$$$$$$$$***********$$$$$$$$$$$$ {:#?}", e);
             return match e {
                 RowNotFound => {Ok(None)},
                 _ => {Err(ApiError::DatabaseError(e))}

@@ -119,7 +119,7 @@ impl Email {
             .unwrap().credentials(creds).build();
 
         if let Err(e) = mailer.send(&email) {
-            // persist this errors
+            // persist these errors * tracing??
             println!("ERROR SENDING EMAIL?????? {:#?}", e);
         }
     }

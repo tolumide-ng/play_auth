@@ -18,7 +18,7 @@ pub struct User {
 }
 
 
-// todo!() only dispatch an event into the queue when a user has been verified on the verify endpoint
+// todo!() only dispatch an event into the queue when a user has been verified on the verify endpoint (this should be on the verify endpoint)
 #[post("/create", data = "<user>")]
 pub async fn create(
     user: Json<User>, 
@@ -26,42 +26,40 @@ pub async fn create(
     state: &State<Settings>,
     redis: &State<redis::Client>,
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
-    // println!(":::::::::::::::::");
     dotenv().ok();
-    // println!(":::::::::::::::::<>>>>>>>>>>>>>>>>");
     let User {email, password} = user.0;
-    println!("::::::::::::::::: {:#?} {:#?}", email, password);
-
     let parsed_email = Email::parse(email)?;
-    println!("|||||||||||||||||||||||||||||||||||||||||||||||||");
-
-
-
-
-    
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
-    // println!("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
     println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-    let mut redis_conn = redis.get_async_connection().await.unwrap();
-    println!("***********************************************");
-
-    if user_already_exists.is_none() {
-        println!("!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
-        let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
-        let jwt = SignupJwt::new(user_id).encode(&state.app)?;
-
-        let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
-        redis_conn.set(&key, &jwt).await?;
-        redis_conn.expire(&key, MINUTES_120 as usize).await?;
+    // let mut redis_conn = redis.get_async_connection().await;
+    match redis.get_async_connection().await {
+        Ok(mut redis_conn) => {
+            if user_already_exists.is_none() {
+                println!("!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
+                let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
+                let jwt = SignupJwt::new(user_id).encode(&state.app)?;
         
-        let mail_type = MailType::Signup(MailInfo::new(jwt, &state.app.frontend_url));
-        Email::new(parsed_email, None, mail_type).send_email(&state.email);
+                let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
+                redis_conn.set(&key, &jwt).await?;
+                redis_conn.expire(&key, MINUTES_120 as usize).await?;
+                
+                let mail_type = MailType::Signup(MailInfo::new(jwt, &state.app.frontend_url));
+                Email::new(parsed_email, None, mail_type).send_email(&state.email);
+        
+                return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
+            }
+        }
 
-        return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
+        Err(e) => {
+            println!("THE ERROR!!!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>> {:#?}", e);
+        }
     }
+
+
+
 
     return Err(ApiError::Conflict("Email already exists"));
 }

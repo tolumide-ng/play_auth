@@ -54,7 +54,7 @@ services:
             app__app__jwt_secret: ${JWT_SECRET}
 networks:
     webnet:
-        # driver: bridge
+        driver: bridge
 volumes:
     pgdata:
     static_volume:

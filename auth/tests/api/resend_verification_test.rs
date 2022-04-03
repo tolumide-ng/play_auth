@@ -2,7 +2,7 @@
 mod test {
     use redis::AsyncCommands;
 
-    use auth::{helpers::{mails::email::Email, passwords::pwd::Password, test_helpers::get_appsettings, commons::{RedisKey, RedisPrefix}, jwt_tokens::jwt::{SignupJwt, Jwt, LoginJwt}}, base_repository::user::DbUser};
+    use auth::{helpers::{mails::email::Email, passwords::pwd::Password, test_helpers::get_appsettings, commons::{RedisKey, RedisPrefix}, jwt_tokens::jwt::{Jwt, LoginJwt}}, base_repository::user::DbUser};
     use rocket::http::{ContentType, Header, Status};
     use crate::helpers::{app::get_client, utils::{get_email, get_pwd, get_invalid_jwt}, response::{ResponseType, parse_api_response}};
 
@@ -107,7 +107,7 @@ mod test {
         let jwt_key = RedisKey::new(RedisPrefix::Login, user_id).make_key();
         let jwt_value = LoginJwt::new(email.clone(), user_id, "user_id".to_string(), false).encode(&client.config().app).unwrap();
         let mut redis_conn = client.redis().get_async_connection().await.unwrap();
-        let res: Option<String> = redis_conn.set(&jwt_key, &jwt_value).await.unwrap();
+        let _res: Option<String> = redis_conn.set(&jwt_key, &jwt_value).await.unwrap();
 
         let response = client.app().post(RESEND)
             .header(ContentType::JSON)

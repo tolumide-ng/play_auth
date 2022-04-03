@@ -1,5 +1,5 @@
-use auth::{settings::database::DbSettings, errors::app::ApiError};
-use sqlx::{PgConnection, Connection, Executor, PgPool, migrate::MigrateDatabase, Postgres, Pool};
+use auth::{settings::database::DbSettings};
+use sqlx::{PgConnection, Connection, Executor, PgPool};
 
 pub struct TestDb;
 
@@ -23,24 +23,24 @@ impl TestDb {
     }
     
 
-    pub async fn drop_db(config: &DbSettings, db_pool: &Pool<Postgres>) -> Result<(), ApiError> {
+    // pub async fn drop_db(config: &DbSettings, db_pool: &Pool<Postgres>) -> Result<(), ApiError> {
 
-        db_pool.close().await;
-        let DbSettings { host, port, username, password, database_name, .. } = &config;
-        let url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
+    //     db_pool.close().await;
+    //     let DbSettings { host, port, username, password, database_name, .. } = &config;
+    //     let _url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
 
-        let mut conn = PgConnection::connect_with(&config.with_db())
-            .await.expect("");
+    //     let mut conn = PgConnection::connect_with(&config.with_db())
+    //         .await.expect("");
 
-        // let query = format!("DROP DATABASE IF EXISTS \"{}\"", database_name);
-        let query = format!("select pg_terminate_backend(pid) from pg_stat_activity where datname='{}';", database_name);
+    //     // let query = format!("DROP DATABASE IF EXISTS \"{}\"", database_name);
+    //     let query = format!("select pg_terminate_backend(pid) from pg_stat_activity where datname='{}';", database_name);
 
-        let _ = conn
-            .execute(&*query).await.unwrap();
+    //     let _ = conn
+    //         .execute(&*query).await.unwrap();
 
-        // sqlx::postgres::Postgres::drop_database(&url).await?;
-        // let mut connection = PgConnection
+    //     // sqlx::postgres::Postgres::drop_database(&url).await?;
+    //     // let mut connection = PgConnection
         
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }

@@ -41,7 +41,6 @@ macro_rules! parse_env {
     ($field:ident:$type:ty) => {
         let ab = stringify!($field).to_string();
         let cd = stringify!($type).to_string();
-        // println!("Got called!! ((((((((((((()))))))))))))))))) {:#?} ---------------- {:#?} ((((((((((((())))))))))))))))))", ab, cd)
     };
     ($vis:vis $struct:ident {$( $field:ident:$type:ty ),*,}) => (
         // $(  )*
@@ -53,7 +52,6 @@ macro_rules! parse_env {
 macro_rules! speak {
     ($field:ident:$type:ty) => (
         let ab = stringify!($field).to_string();
-        // println!("Got called!! ((((((((((((()))))))))))))))))) {:#?}", ab)
     )
 }
 
