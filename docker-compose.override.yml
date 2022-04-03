@@ -1,3 +1,4 @@
+# for development environment
 version: "3.9"
 
 services:
@@ -8,7 +9,10 @@ services:
             target: dev
         volumes:
           - ".:/usr/src/app"
+        command: ["/bin/bash", "./scripts/init_db.sh"]
+    db:
+        volumes:
           - "target-cache:/usr/src/app/target"
-        command: ["cargo", "watch", "-x", "run", "-p", "auth"]
+        
 volumes:
     target-cache:

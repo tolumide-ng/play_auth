@@ -17,6 +17,8 @@ services:
             POSTGRES_PORT: ${DB_PORT}
             POSTGRES_HOST: ${DB_HOST}
             POSTGRES_NAME: ${DB_NAME}
+        ports:
+          - ${DB_PORT}:${DB_PORT}
     web:
         depends_on:
             - db
