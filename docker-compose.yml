@@ -8,7 +8,7 @@ services:
             redis_uri: ${REDIS_URI}
     postgres:
         hostname: db
-        image: postgres
+        image: postgres:14.2
         networks:
             - webnet
         volumes:
@@ -25,7 +25,7 @@ services:
           - 5432:5432
     web:
         depends_on:
-            - postgres:14.2
+            - postgres
             - redis
         ports:
           - 8000:8000

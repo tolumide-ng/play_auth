@@ -41,3 +41,11 @@ play_build_prod:
 .PHONY: Run application with docker compose in production
 play_prod:
 	docker compose -f docker-compose.prod.yml up
+
+.PHONY: Run test locally (docker compose in not up)
+test_play:
+	docker compose run --rm web cargo test
+
+.PHONY: Run test locally (docker compose is already up)
+test_play_up:
+	docker compose exec web cargo test

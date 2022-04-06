@@ -32,33 +32,21 @@ pub async fn create(
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
-    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-    // let mut redis_conn = redis.get_async_connection().await;
-    match redis.get_async_connection().await {
-        Ok(mut redis_conn) => {
-            if user_already_exists.is_none() {
-                println!("!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
-                let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
-                let jwt = SignupJwt::new(user_id).encode(&state.app)?;
-        
-                let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
-                redis_conn.set(&key, &jwt).await?;
-                redis_conn.expire(&key, MINUTES_120 as usize).await?;
-                
-                let mail_type = MailType::Signup(MailInfo::new(jwt, &state.app.frontend_url));
-                Email::new(parsed_email, None, mail_type).send_email(&state.email);
-        
-                return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
-            }
-        }
+    let mut redis_conn = redis.get_async_connection().await?;
+    if user_already_exists.is_none() {
+        let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
+        let jwt = SignupJwt::new(user_id).encode(&state.app)?;
 
-        Err(e) => {
-            println!("THE ERROR!!!!!!!!!!!!!!!!!!!!!!!>>>>>>>>>>>>>>>>>>>>>>>>>>>> {:#?}", e);
-        }
+        let key = RedisKey::new(RedisPrefix::Signup, user_id).make_key();
+        redis_conn.set(&key, &jwt).await?;
+        redis_conn.expire(&key, MINUTES_120 as usize).await?;
+        
+        let mail_type = MailType::Signup(MailInfo::new(jwt, &state.app.frontend_url));
+        Email::new(parsed_email, None, mail_type).send_email(&state.email);
+
+        return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
     }
-
-
 
 
     return Err(ApiError::Conflict("Email already exists"));

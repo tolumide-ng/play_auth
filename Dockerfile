@@ -3,25 +3,30 @@ FROM rust:1.59.0 AS base
 ENV SQLX_OFFLINE true
 ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
-RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
-# CMD ["sqlx migrate --source=auth run"]
 
 # -------------------------------------
 FROM base AS dev
+RUN ls -l
 RUN cargo install cargo-watch
+RUN ls -l
 WORKDIR /usr/src/app
+RUN ls -l
 COPY . .
 
 
 # -------------------------------------
 FROM base AS builder
-RUN USER=root cargo new --bin play_auth
+ADD . /play_auth
+RUN ls -l
+RUN ls -l ./play_auth
 WORKDIR /play_auth
-COPY . ./
+RUN cargo build --release -p auth
+RUN ls -l
 
-RUN cargo build --release -p auth \
-    && rm src/*.rs target/release/deps/auth*
 
+FROM debian:buster-slim as debian
+RUN ls -l usr/src
+RUN ls -l
 ARG APP=/usr/src/app
 
 RUN apt-get update \
@@ -29,21 +34,19 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Etc/UTC \
-    APP_USER=app_user
+    APP_USER=appuser
 
 RUN groupadd $APP_USER \
     && useradd -g $APP_USER $APP_USER \
     && mkdir -p ${APP}
 
-
-# -------------------------------------
 FROM debian AS prod
-COPY --from=builder /play_auth/target/release/auth auth
-COPY configuration configuration
-
-
-# USER $APP_USER
-# WORKDIR ${APP}
-
-CMD [ "./auth" ]
+WORKDIR /usr/src/app
+COPY --from=builder /play_auth/target/release/auth ${APP}/auth
+COPY --from=builder /play_auth/configuration ${APP}/configuration
+RUN chown -R $APP_USER:$APP_USER ${APP}
+USER $APP_USER
+WORKDIR ${APP}
+ENV ROCKET_ADDRESS=0.0.0.0
+EXPOSE 8000
 
