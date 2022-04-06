@@ -48,10 +48,8 @@ pub async fn logout(
 
         match value {
             Ok(val)  => {
-                println!("********************************************* {:#?}", &current_keys[checked]);
                 if let Some(v) = val {
                     if v == token {
-                        println!(":::::::::::::::::: {:#?} :::::::::::::::::::::", &current_keys[checked]);
                         redis_conn.del(&current_keys[checked]).await?;
                         key_found = true;
                     }

@@ -2,7 +2,7 @@
 mod test {
     use std::collections::HashMap;
 
-    use auth::{helpers::{test_helpers::get_appsettings, passwords::pwd::Password, mails::email::Email, commons::{RedisKey, RedisPrefix}, jwt_tokens::jwt::{LoginJwt, Jwt}}, base_repository::user::DbUser};
+    use auth::{helpers::{test_helpers::get_appsettings, passwords::pwd::Password, mails::email::Email, commons::{RedisKey, RedisPrefix}}, base_repository::user::DbUser};
     use rocket::http::{ContentType, Status};
     use serde::Deserialize;
     use serde_json::Value;

@@ -18,7 +18,7 @@ pub struct User {
 }
 
 
-// todo!() only dispatch an event into the queue when a user has been verified on the verify endpoint
+// todo!() only dispatch an event into the queue when a user has been verified on the verify endpoint (this should be on the verify endpoint)
 #[post("/create", data = "<user>")]
 pub async fn create(
     user: Json<User>, 
@@ -28,14 +28,12 @@ pub async fn create(
 ) -> ApiResult<Json<ApiSuccess<&'static str>>> {
     dotenv().ok();
     let User {email, password} = user.0;
-
     let parsed_email = Email::parse(email)?;
     let parsed_pwd = Password::new(password.clone(), &state.app)?;
 
     let user_already_exists = DbUser::email_exists(pool, &parsed_email).await?;
 
     let mut redis_conn = redis.get_async_connection().await?;
-
     if user_already_exists.is_none() {
         let user_id = DbUser::create_user(pool, &parsed_email, parsed_pwd).await?;
         let jwt = SignupJwt::new(user_id).encode(&state.app)?;
@@ -49,6 +47,7 @@ pub async fn create(
 
         return Ok(ApiSuccess::reply_success(Some("Please check your email to verify your account")));
     }
+
 
     return Err(ApiError::Conflict("Email already exists"));
 }

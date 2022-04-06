@@ -37,7 +37,7 @@ pub async fn forgot(
         return Ok(ApiSuccess::reply_success(Some(MESSAGE.to_string())))
     }
 
-    let the_user = user.unwrap().get_user().1;
+    let the_user = user.unwrap().get_user().user_id;
 
     let mut redis_conn = redis.get_async_connection().await?;
 

@@ -37,7 +37,7 @@ mod test_jwt {
     }
 
     #[test]
-    fn forgot_token_expires_after_two_hours() {
+    fn forgot_token_expires_after_two_minutes() {
         let user_id: Uuid = Uuid::new_v4();
         const TWENTY_MINUTES: usize = 1200000; // Equivalent of twenty minutes in ms
         let envs = get_appsettings();
@@ -46,7 +46,7 @@ mod test_jwt {
         let decoded_token: TokenData<ForgotPasswordJwt> = ForgotPasswordJwt::decode(&encoded_token, &envs).unwrap();
         
         let active_period = decoded_token.claims.exp - decoded_token.claims.iat;
-        // assert_eq!(active_period, TWENTY_MINUTES);
+        assert_eq!(active_period, TWENTY_MINUTES);
         assert_eq!(decoded_token.claims.subj, "Forgot".to_string());
 
     }

@@ -1,18 +1,52 @@
-# Builder stage
-FROM rust:1.59.0 AS builder
-
-WORKDIR /app
-COPY . .
+# https://github.com/zupzup/rust-docker-web/blob/main/debian/Dockerfile
+FROM rust:1.59.0 AS base
 ENV SQLX_OFFLINE true
-RUN cargo build -p auth --release
-
-# Runtime stage
-FROM rust:1.56.0 AS runtime
-RUN cargo install cargo-watch
-WORKDIR /app
-# Copy the compiled binary from the builder env to our runtime
-COPY --from=builder /app/target/release/auth auth
+ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
-# We need the configuration file at runtime
-ENTRYPOINT [ "./auth" ]
+
+# -------------------------------------
+FROM base AS dev
+RUN ls -l
+RUN cargo install cargo-watch
+RUN ls -l
+WORKDIR /usr/src/app
+RUN ls -l
+COPY . .
+
+
+# -------------------------------------
+FROM base AS builder
+ADD . /play_auth
+RUN ls -l
+RUN ls -l ./play_auth
+WORKDIR /play_auth
+RUN cargo build --release -p auth
+RUN ls -l
+
+
+FROM debian:buster-slim as debian
+RUN ls -l usr/src
+RUN ls -l
+ARG APP=/usr/src/app
+
+RUN apt-get update \
+    && apt-get install -y ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV TZ=Etc/UTC \
+    APP_USER=appuser
+
+RUN groupadd $APP_USER \
+    && useradd -g $APP_USER $APP_USER \
+    && mkdir -p ${APP}
+
+FROM debian AS prod
+WORKDIR /usr/src/app
+COPY --from=builder /play_auth/target/release/auth ${APP}/auth
+COPY --from=builder /play_auth/configuration ${APP}/configuration
+RUN chown -R $APP_USER:$APP_USER ${APP}
+USER $APP_USER
+WORKDIR ${APP}
+ENV ROCKET_ADDRESS=0.0.0.0
+EXPOSE 8000
 

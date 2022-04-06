@@ -28,7 +28,7 @@ pub enum ErrorResponse {
 pub enum ApiError {
     #[error("Internal Server Error")]
     DatabaseError(#[from] sqlx::Error),
-    #[error("Token is either expired or does not exist")]
+    #[error("Token is either expired or invalid")]
     JwtError(#[from] JwtError),
     #[error("{0}")]
     BadRequest(&'static str),

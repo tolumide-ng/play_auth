@@ -8,7 +8,7 @@ pub fn internal_error() -> ApiError {
 }
 
 #[catch(400)]
-pub fn bad_request(req: &Request) -> ApiError {
+pub fn bad_request(_req: &Request) -> ApiError {
     ApiError::BadRequest("Bad request")
 }
 

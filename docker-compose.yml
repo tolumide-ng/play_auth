@@ -1,34 +1,60 @@
 version: "3.9"
 services:
-  backend:
-     build:
-         dockerfile: Dockerfile
-         context: .
-     depends_on:
-         - redis
-         - db
-     ports:
-       - "8001:8000"
-     networks:
-         - webnet
-     restart: on-failure:2
-    #  command: bash -c "cargo watch -x \"run -p auth\""
-  redis:
-     image: redis
-  db:
-     image: postgres
-     volumes:
-        - pgdata:/var/lib/postgresql/data
-     networks:
-         - webnet
-     restart: on-failure:2
-     environment:
-        POSTGRES_USERNAME: ${DB_USERNAME}
-        POSTGRES_PASSWORD: ${DB_PASSWORD}
-        POSTGRES_PORT: ${DB_PORT}
-        POSTGRES_HOST: ${DB_HOST}
-        POSTGRES_NAME: ${DB_NAME}
+    redis:
+        image: redis
+        networks:
+            - webnet
+        environment:
+            redis_uri: ${REDIS_URI}
+    postgres:
+        hostname: db
+        image: postgres:14.2
+        networks:
+            - webnet
+        volumes:
+            - ./data:/docker-entrypoint-initdb.d
+            - pgdata:/var/lib/postgresql/data
+        restart: on-failure:2
+        environment:
+            POSTGRES_USERNAME: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_PORT: ${DB_PORT}
+            POSTGRES_HOST: ${DB_HOST}
+            POSTGRES_NAME: ${DB_NAME}
+        ports:
+          - 5432:5432
+    web:
+        depends_on:
+            - postgres
+            - redis
+        ports:
+          - 8000:8000
+        networks:
+            - webnet
+        links:
+          - postgres
+        environment:
+            app__db__username: ${DB_USERNAME:-postgres}
+            app__db__password: ${DB_PASSWORD:?database password not set}
+            app__db__port: ${DB_PORT:-5432}
+            app__db__host: db
+            app__db__name: ${DB_NAME:-play_auth}
+            app__db__require_ssl: ${DB_SSL}
+            app__email__smtp_server: ${SMTP_SERVER}
+            app__email__smtp_user: ${SMTP_USER}
+            app__email__smtp_pass: ${SMTP_PASS}
+            app__app_env: ${APP_ENV}
+            app__app__m_cost: ${M_COST}
+            app__app__t_cost: ${T_COST}
+            app__app__p_cost: ${P_COST}
+            app__app__port: ${APP_PORT}
+            app__app_name: ${APP_NAME}
+            app__redis_uri: ${REDIS_URI}
+            app__app__frontend_url: ${FRONTEND_URL}
+            app__app__jwt_secret: ${JWT_SECRET}
 networks:
     webnet:
+        driver: bridge
 volumes:
     pgdata:
+    static_volume:

@@ -1,11 +1,10 @@
-use auth::{settings::database::DbSettings, errors::app::ApiError};
-use sqlx::{PgConnection, Connection, Executor, PgPool, migrate::MigrateDatabase, Postgres, Pool};
+use auth::{settings::database::DbSettings};
+use sqlx::{PgConnection, Connection, Executor, PgPool};
 
 pub struct TestDb;
 
 impl TestDb {
     pub async fn create_db(config: &DbSettings) -> PgPool {
-        println!("\n\n |||||||||||||THE DATABASE NAME {:#?} \n||||||||||||||||||||| \n\n ", &config.database_name);
         let mut connection = PgConnection::connect_with(&config.without_db())
             .await
             .expect("Failed to connect to postgres");
@@ -24,25 +23,24 @@ impl TestDb {
     }
     
 
-    pub async fn drop_db(config: &DbSettings, db_pool: &Pool<Postgres>) -> Result<(), ApiError> {
+    // pub async fn drop_db(config: &DbSettings, db_pool: &Pool<Postgres>) -> Result<(), ApiError> {
 
-        db_pool.close().await;
-        let DbSettings { host, port, username, password, database_name, .. } = &config;
-        println!("CLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSECLOSE {:#?}", &database_name);
-        let url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
+    //     db_pool.close().await;
+    //     let DbSettings { host, port, username, password, database_name, .. } = &config;
+    //     let _url= format!("postgres://{}:{}@{}:{}/{}", username, password, host, port, database_name);
 
-        let mut conn = PgConnection::connect_with(&config.with_db())
-            .await.expect("");
+    //     let mut conn = PgConnection::connect_with(&config.with_db())
+    //         .await.expect("");
 
-        // let query = format!("DROP DATABASE IF EXISTS \"{}\"", database_name);
-        let query = format!("select pg_terminate_backend(pid) from pg_stat_activity where datname='{}';", database_name);
+    //     // let query = format!("DROP DATABASE IF EXISTS \"{}\"", database_name);
+    //     let query = format!("select pg_terminate_backend(pid) from pg_stat_activity where datname='{}';", database_name);
 
-        let _ = conn
-            .execute(&*query).await.unwrap();
+    //     let _ = conn
+    //         .execute(&*query).await.unwrap();
 
-        // sqlx::postgres::Postgres::drop_database(&url).await?;
-        // let mut connection = PgConnection
+    //     // sqlx::postgres::Postgres::drop_database(&url).await?;
+    //     // let mut connection = PgConnection
         
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }
