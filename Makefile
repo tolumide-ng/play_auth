@@ -43,8 +43,16 @@ play_prod:
 	docker compose -f docker-compose.prod.yml up
 
 .PHONY: Run test locally (docker compose in not up)
-test_play:
+play_test:
 	docker compose run --rm web cargo test
+
+.PHONY: Stop all running containers
+play_down:
+	docker compose down
+
+.PHONY: Stop all running containers and volumes
+play_all_down:
+	docker compose down -v
 
 .PHONY: Run test locally (docker compose is already up)
 test_play_up:

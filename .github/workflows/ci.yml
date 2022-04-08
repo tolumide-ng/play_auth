@@ -8,14 +8,49 @@ env:
 
 jobs:
   build_and_test:
-   name: Auth latest
-   runs-on: ubuntu-20.04
-   strategy:
-    matrix:
-     toolchains:
-      - stable
-   steps:
-     - uses: actions/checkout@v2
-     - uses: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
-     - uses: cargo build --verbose
-     - uses: cargo test --verbose
+    # - name: Create env file
+    name: Auth latest
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        toolchains:
+          - stable
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+      - name: Create env file
+        run: |
+          touch .env
+          echo DB_USERNAME=${DB_USERNAME} >> .env
+          echo DB_PASSWORD=${DB_PASSWORD} >> .env
+          echo DB_PORT=${DB_PORT} >> .env
+          echo DB_HOST=${DB_HOST} >> .env
+          echo DB_NAME=${DB_NAME} >> .env
+          echo M_COST=${M_COST} >> .env
+          echo T_COST=${T_COST} >> .env
+          echo P_COST=${P_COST} >> .env
+          echo APP_PORT=${APP_PORT} >> .env
+          echo APP_NAME=${APP_NAME} >> .env
+          echo REDIS_URI=${REDIS_URI} >> .env
+          echo FRONTEND_URL=${FRONTEND_URL} >> .env
+          echo JWT_SECRET=${JWT_SECRET} >> .env
+          cat .env
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: $ {{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          M_COST: ${{ secrets.M_COST }}
+          T_COST: ${{ secrets.T_COST }}
+          P_COST: ${{ secrets.P_COST }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          APP_NAME: ${{ secrets.APP_NAME }}
+          REDIS_URI: ${{ secrets.REDIS_URI }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      - name: Start containers
+        run: make play_test
+      - name: Stop containers
+        if: always()
+        run: make play_all_down
