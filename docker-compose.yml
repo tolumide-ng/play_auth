@@ -22,13 +22,13 @@ services:
             POSTGRES_HOST: ${DB_HOST}
             POSTGRES_NAME: ${DB_NAME}
         ports:
-          - 5432:5432
+          - ${DB_PORT}:5432
     web:
         depends_on:
             - postgres
             - redis
         ports:
-          - 8000:8000
+          - ${APP_PORT}:8000
         networks:
             - webnet
         links:
@@ -39,11 +39,11 @@ services:
             app__db__port: ${DB_PORT:-5432}
             app__db__host: db
             app__db__name: ${DB_NAME:-play_auth}
-            app__db__require_ssl: ${DB_SSL}
+            app__db__require_ssl: ${DB_SSL:-false}
             app__email__smtp_server: ${SMTP_SERVER}
             app__email__smtp_user: ${SMTP_USER}
             app__email__smtp_pass: ${SMTP_PASS}
-            app__app_env: ${APP_ENV}
+            app__app_env: ${APP_ENV:-test}
             app__app__m_cost: ${M_COST}
             app__app__t_cost: ${T_COST}
             app__app__p_cost: ${P_COST}

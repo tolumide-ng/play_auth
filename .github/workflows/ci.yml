@@ -5,6 +5,19 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DB_USERNAME: "postgres"
+  DB_PASSWORD: "postgres"
+  DB_PORT: "5432"
+  DB_HOST: "postgres"
+  DB_NAME: "authey_test"
+  M_COST: 1250
+  T_COST: 2
+  P_COST: 2
+  APP_PORT: 6005
+  APP_NAME: "eleniyan"
+  REDIS_URI: "redis://redis:6379"
+  FRONTEND_URL: "https://sample.example.com"
+  JWT_SECRET: "AProbablylONGJWT923PU32NMSNDKLTOKEN20//12=2394309ORSECRET"
 
 jobs:
   build_and_test:
@@ -18,37 +31,6 @@ jobs:
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
-      - name: Create env file
-        run: |
-          touch .env
-          echo DB_USERNAME=${DB_USERNAME} >> .env
-          echo DB_PASSWORD=${DB_PASSWORD} >> .env
-          echo DB_PORT=${DB_PORT} >> .env
-          echo DB_HOST=${DB_HOST} >> .env
-          echo DB_NAME=${DB_NAME} >> .env
-          echo M_COST=${M_COST} >> .env
-          echo T_COST=${T_COST} >> .env
-          echo P_COST=${P_COST} >> .env
-          echo APP_PORT=${APP_PORT} >> .env
-          echo APP_NAME=${APP_NAME} >> .env
-          echo REDIS_URI=${REDIS_URI} >> .env
-          echo FRONTEND_URL=${FRONTEND_URL} >> .env
-          echo JWT_SECRET=${JWT_SECRET} >> .env
-          cat .env
-        env:
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: $ {{ secrets.DB_PASSWORD }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          M_COST: ${{ secrets.M_COST }}
-          T_COST: ${{ secrets.T_COST }}
-          P_COST: ${{ secrets.P_COST }}
-          APP_PORT: ${{ secrets.APP_PORT }}
-          APP_NAME: ${{ secrets.APP_NAME }}
-          REDIS_URI: ${{ secrets.REDIS_URI }}
-          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
       - name: Start containers
         run: make play_test
       - name: Stop containers
