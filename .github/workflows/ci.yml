@@ -19,11 +19,14 @@ env:
   FRONTEND_URL: "https://sample.example.com"
   JWT_SECRET: "AProbablylONGJWT923PU32NMSNDKLTOKEN20//12=2394309ORSECRET"
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_and_test:
-    # - name: Create env file
-    name: Auth latest
-    runs-on: ubuntu-20.04
+    name: Runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         toolchains:
