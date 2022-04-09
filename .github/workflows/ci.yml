@@ -1,4 +1,4 @@
-name: Cargo Build & Test
+name: Play_auth CI
 
 on:
   pull_request:
