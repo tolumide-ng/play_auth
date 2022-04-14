@@ -6,27 +6,19 @@ EXPOSE 8000
 
 # -------------------------------------
 FROM base AS dev
-RUN ls -l
 RUN cargo install cargo-watch
-RUN ls -l
 WORKDIR /usr/src/app
-RUN ls -l
 COPY . .
 
 
 # -------------------------------------
 FROM base AS builder
 ADD . /play_auth
-RUN ls -l
-RUN ls -l ./play_auth
 WORKDIR /play_auth
 RUN cargo build --release -p auth
-RUN ls -l
 
 
 FROM debian:buster-slim as debian
-RUN ls -l usr/src
-RUN ls -l
 ARG APP=/usr/src/app
 
 RUN apt-get update \
