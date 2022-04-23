@@ -29,6 +29,6 @@ make play_dev # to start the application
 
 ### 2. Run the application in a production environment
 ```
-docker compose up -f docker-compose.yml -f docker-compose.prod.yml up -d # to start the application
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d # to start the application
 docker compose down -f docker-compose.yml -f docker-compose.prod.yml down
 ```
