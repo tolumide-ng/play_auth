@@ -3,3 +3,4 @@ target/
 tolu-compose.yml
 .DS_Store
 ./*/**/.DS_Store
+.vscode/

@@ -10,7 +10,8 @@ services:
     kafka:
         image: "bitnami/kafka:3.2"
         hostname: kafka
-        depends_on: zookeeper
+        depends_on:
+            - zookeeper
         ports:
             - "9092:9092"
         environment:
