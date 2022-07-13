@@ -34,6 +34,17 @@ services:
         ports:
             # - 9092:9092
             - '9093:9093'
+    connect:
+        image: debezium/connect
+        depends_on:
+            - zookeeper
+        ports:
+            - 8083:8083
+        environment:
+            - GROUP_ID=1
+            - CONFIG_STORAGE_TOPIC=${KAFKA_TOPIC}
+            - OFFSET_STORAGE_TOPIC=${KAFKA_OFFSET_TOPIC}
+            - ADVERTISED_HOST_NAME=$(echo $DOCKER_HOST | cut -f3  -d'/' | cut -f1 -d':')
     postgres:
         hostname: db
         image: debezium/postgres:latest
@@ -63,6 +74,7 @@ services:
             POSTGRES_PASSWORD: postgrepw
             POSTGRES_DB: play_auth
             PGPASSWORD: postgrespw
+    
     debezium:
         image: debezium/connect:14
         environment:
