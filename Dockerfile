@@ -15,7 +15,10 @@ COPY . .
 FROM base AS builder
 ADD . /play_auth
 WORKDIR /play_auth
-RUN cargo build --release -p auth
+
+# RUN cargo install sqlx-cli
+# RUN cargo sqlx prepare --merged
+RUN  cargo build --release -p auth
 
 
 FROM debian:buster-slim as debian
@@ -32,8 +35,10 @@ RUN groupadd $APP_USER \
     && useradd -g $APP_USER $APP_USER \
     && mkdir -p ${APP}
 
+# -------------------------------------
 FROM debian AS prod
 WORKDIR /usr/src/app
+COPY --from=builder /play_auth/sqlx-data.json ${APP}/sqlx-data.json
 COPY --from=builder /play_auth/target/release/auth ${APP}/auth
 COPY --from=builder /play_auth/configuration ${APP}/configuration
 RUN chown -R $APP_USER:$APP_USER ${APP}

@@ -12,7 +12,8 @@ use crate::settings::database::DbSettings;
 
 pub async fn build (config: Settings) -> Rocket<Build>{
     let db_pool = get_pool(&config.db);
-    sqlx::migrate!("./migrations").run(&db_pool).await.unwrap();
+    
+    sqlx::migrate!("./migrations").run(&db_pool).await?;
     let redis_client = redis::Client::open(&*config.redis_uri).expect("Unable to establish connection to redis");
 
     rocket::build()

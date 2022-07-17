@@ -1,0 +1,13 @@
+{
+    "name": "play_auth",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "database.hostname": "",
+        "database.port": "5432",
+        "database.user": "postgres",
+        "database.password": "postgres",
+        "database.dbname": "play_auth",
+        "database.server.name": "authentication",
+        "table.include.list": ""
+    }
+}

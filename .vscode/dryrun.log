@@ -1,0 +1,8 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/mide/Desktop/projects/play_auth'
+echo "----------------------------------------"
+echo "make help: wil print this message"
+echo "make migrate: will the auth workspace's migrations"
+echo "----------------------------------------"
+make: Leaving directory '/home/mide/Desktop/projects/play_auth'
+ 
