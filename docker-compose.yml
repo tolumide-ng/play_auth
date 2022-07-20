@@ -1,5 +1,38 @@
 version: "3.9"
 services:
+    zookeeper:
+        image: zookeeper:latest
+        restart: always
+        ports:
+            - 2181:2181
+        networks:
+            - webnet
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+    kafka:
+        image: bitnami/kafka:latest
+        # volume:
+        #     - ~/:/bitnami/kafka
+        depends_on: [zookeeper]
+        networks:
+            - webnet
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+            ALLOW_PLAINTEXT_LISTENER: yes
+            KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+            KAFKA_CFG_LISTENERS: CLIENT://:9092,EXTERNAL://:9093
+            KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
+            KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
+            KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT
+            # KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+            # KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+            # KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+            # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+            # KAFKA_OFFSET_TOPIC_REPLICATION_FACTOR: 1-0o0p-9i0o-=p
+            # KAFKA_JMX_PORT: 9991
+        ports:
+            - 9092:9092
     redis:
         image: redis
         networks:
@@ -8,20 +41,26 @@ services:
             redis_uri: ${REDIS_URI}
     postgres:
         hostname: db
-        image: debezium/postgres:latest
+        image: debezium/postgres:12
         networks:
             - webnet
+        # healthcheck:
+        #     test: "pg_isready -U postgresuser -d ${DB_NAME}"
+        #     interval: 2s
+        #     timeout: 20s
+        #     retries: 10
         volumes:
             - ./data:/docker-entrypoint-initdb.d
-            # - pgdata:/var/lib/postgresql/datae
+            # - pgdata:/var/lib/postgresql/data
         restart: on-failure:2
         environment:
-            # POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_USERNAME: ${DB_USERNAME}
+            POSTGRES_USER: ${DB_USERNAME}
             POSTGRES_PORT: ${DB_PORT}
             POSTGRES_HOST: ${DB_HOST}
             POSTGRES_NAME: ${DB_NAME}
-            # POSTGRES_DB: play_auth
+            # POSTGRES_DB: ${DB_NAME}
         ports:
           - ${DB_PORT}:5432
     web:
