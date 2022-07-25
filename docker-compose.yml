@@ -5,45 +5,57 @@ services:
         restart: always
         ports:
             - 2181:2181
-        networks:
-            - webnet
+            - 2888:2888
+            - 3888:3888
         environment:
             ZOOKEEPER_CLIENT_PORT: 2181
-    kafka:
-        image: bitnami/kafka:latest
-        # volume:
-        #     - ~/:/bitnami/kafka
-        depends_on: [zookeeper]
-        networks:
-            - webnet
-        environment:
-            KAFKA_BROKER_ID: 1
-            KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-            ALLOW_PLAINTEXT_LISTENER: yes
-            KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-            KAFKA_CFG_LISTENERS: CLIENT://:9092,EXTERNAL://:9093
-            KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
-            KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
-            KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT
+        volumes:
+          - ${pwd}/zoo.cfg:/conf/zoo.cfgsw
+    # kafka:
+    #     image: bitnami/kafka:latest
+    #     # volume:
+    #     #     - ~/:/bitnami/kafka
+    #     depends_on: 
+    #         - zookeeper
+    #     links:
+    #         - zookeeper
+    #     environment:
+    #         KAFKA_BROKER_ID: 1
+    #         KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper:2181"
+    #         ALLOW_PLAINTEXT_LISTENER: yes
+    #         KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+    #         KAFKA_CFG_LISTENERS: CLIENT://:9092,EXTERNAL://:9093
+    #         KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
+    #         KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
+    #         KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT
+    #         KAFKA_OFFSET_TOPIC_REPLICATION_FACTOR: 1
+    #         KAFKA_JMX_PORT: 9991
             # KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
             # KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
             # KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
             # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
             # KAFKA_OFFSET_TOPIC_REPLICATION_FACTOR: 1-0o0p-9i0o-=p
-            # KAFKA_JMX_PORT: 9991
+        # ports:
+        #     - 9092:9092
+    kafka:
+        image: confluentinc/cp-enterprise-kafka:5.5.3
+        depends_on: [zookeeper]
+        environment:
+            KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+            KAFKA_BROKER_ID: 1
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_JMX_PORT: 9991
         ports:
             - 9092:9092
     redis:
         image: redis
-        networks:
-            - webnet
         environment:
             redis_uri: ${REDIS_URI}
     postgres:
+        container_name: postgres_db
         hostname: db
         image: debezium/postgres:12
-        networks:
-            - webnet
         # healthcheck:
         #     test: "pg_isready -U postgresuser -d ${DB_NAME}"
         #     interval: 2s
@@ -63,16 +75,38 @@ services:
             # POSTGRES_DB: ${DB_NAME}
         ports:
           - ${DB_PORT}:5432
+    # connect:
+    #     image: debezium/connect:latest
+    #     ports:
+    #         - 8083:8083
+    #     environment:
+    #         GROUP_ID: 1
+    #         CONFIG_STORAGE_TOPIC: my_connect_configs
+    #         OFFSET_STORAGE_TOPIC: my_connect_offsets
+    #         STATUS_STORAGE_TOPIC: my_connect_statuses
+    #     depends_on:
+    #         - postgres
+    #         - kafka
+    #         - zookeeper
+    #     links:
+    #         - kafka
+    #         - postgres
+    #         - zookeeper
+    schema-registry:
+        image: confluentinc/cp-schema-registry:5.5.3
+        environment:
+            SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+            SCHEMA_REGISTRY_HOST_NAME: schema-registry
+            SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081,http://localhost:8081
+        depends_on: [zookeeper, kafka]
     web:
         depends_on:
             - postgres
             - redis
         ports:
-          - ${APP_PORT}:8000
-        networks:
-            - webnet
+            - ${APP_PORT}:8000
         links:
-          - postgres
+            - postgres
         environment:
             app__db__username: ${DB_USERNAME:-postgres}
             app__db__password: ${DB_PASSWORD:?database password not set}
@@ -92,9 +126,9 @@ services:
             app__redis_uri: ${REDIS_URI}
             app__app__frontend_url: ${FRONTEND_URL}
             app__app__jwt_secret: ${JWT_SECRET}
-networks:
-    webnet:
-        driver: bridge
+# networks:
+#     webnet:
+#         driver: bridge
 volumes:
     pgdata:
     static_volume:
