@@ -1,53 +1,34 @@
 version: "3.9"
 services:
     zookeeper:
-        image: zookeeper:latest
+        image: debezium/zookeeper:${ZOOKEEPER_VERSION}
         restart: always
         ports:
-            - 2181:2181
+            - ${ZOOKEEPER_PORT}:2181
             - 2888:2888
             - 3888:3888
         environment:
-            ZOOKEEPER_CLIENT_PORT: 2181
+            # ZOOKEEPER_CLIENT_PORT: 2181
+            SEVER_ID: 1
+            SERVER_COUNT: 1
+            # LOG_LEVEL: info
         volumes:
-          - ${pwd}/zoo.cfg:/conf/zoo.cfgsw
-    # kafka:
-    #     image: bitnami/kafka:latest
-    #     # volume:
-    #     #     - ~/:/bitnami/kafka
-    #     depends_on: 
-    #         - zookeeper
-    #     links:
-    #         - zookeeper
-    #     environment:
-    #         KAFKA_BROKER_ID: 1
-    #         KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper:2181"
-    #         ALLOW_PLAINTEXT_LISTENER: yes
-    #         KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-    #         KAFKA_CFG_LISTENERS: CLIENT://:9092,EXTERNAL://:9093
-    #         KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
-    #         KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
-    #         KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT
-    #         KAFKA_OFFSET_TOPIC_REPLICATION_FACTOR: 1
-    #         KAFKA_JMX_PORT: 9991
-            # KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
-            # KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-            # KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-            # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-            # KAFKA_OFFSET_TOPIC_REPLICATION_FACTOR: 1-0o0p-9i0o-=p
-        # ports:
-        #     - 9092:9092
+            - $PWD/zookeeper/data:/zookeeper/data
+            - $PWD/zookeeper/txns:/zookeeper/txns
     kafka:
-        image: confluentinc/cp-enterprise-kafka:5.5.3
+        image: debezium/kafka:${KAFKA_VERSION}
         depends_on: [zookeeper]
         environment:
-            KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
             KAFKA_BROKER_ID: 1
-            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-            KAFKA_JMX_PORT: 9991
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+            KAFKA_CREATE_TOPICS: ${KAFKA_TOPIC_EINS}:1:2
+            # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${9092}
+        links:
+          - zookeeper
         ports:
             - 9092:9092
+        volumes:
+          - $PWD/kafka/data:kafka/data
     redis:
         image: redis
         environment:
