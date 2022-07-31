@@ -78,6 +78,7 @@ services:
         depends_on:
             - postgres
             - redis
+            - kafka
         ports:
             - ${APP_PORT}:8000
         links:
@@ -101,6 +102,8 @@ services:
             app__redis_uri: ${REDIS_URI}
             app__app__frontend_url: ${FRONTEND_URL}
             app__app__jwt_secret: ${JWT_SECRET}
+            app__kafka__topic: ${KAFKA_TOPIC_EINS}
+            app__kafka__server: ${KAFKA_SERVER}
 # networks:
 #     webnet:
 #         driver: bridge

@@ -6,6 +6,8 @@ EXPOSE 8000
 
 # -------------------------------------
 FROM base AS dev
+# install libssl-dev
+# install cmake
 RUN cargo install cargo-watch
 WORKDIR /usr/src/app
 COPY . .
