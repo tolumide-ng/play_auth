@@ -15,31 +15,35 @@ path = "src/main.rs"
 test = []
 
 [dependencies]
+anyhow = "1.0.53"
+argon2 = { version = "0.4.0", features = ["std"] }
+auth_macro = { path = "../auth_macro" }
+auth_macro_derive = { path = "../auth_macro_derive" }
+base64ct = "1.4.1"
+config = { version = "0.12.0", features = ["yaml"]}
+derive_more = "0.99.17"
+dotenv = "0.15.0"
+
+fancy-regex = "0.8.0"
+lazy_static = "1.4.0"
+lettre = { version = "0.10.0-rc.4", features = ["rustls-tls"] }
+rand_core = { version = "0.6", features = ["std"] }
+rdkafka = { version = "0.28", features = ["dynmaic-linking"] }
+redis = { version="0.21.5", features=["tokio-native-tls-comp", "tokio-comp", "aio", "connection-manager", "cluster"]}
+jsonwebtoken = {version = "8", default-features = false }
+serde-with-expand-env = "1.0.0"
+mockall_double = "0.1.0"
+
+secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.133", features = ["derive"] }
 serde-aux = "3.0.1"
 serde_derive = "1.0.133"
 serde_json = "1.0.75"
 sqlx = { version="0.5.11", features = ["chrono", "tls", "offline", "json", "migrate", "uuid", "postgres", "runtime-tokio-native-tls"] }
-uuid = { version="0.8.2", features = ["serde", "v4"] }
-anyhow = "1.0.53"
 thiserror = "1.0.30"
-dotenv = "0.15.0"
-derive_more = "0.99.17"
-argon2 = { version = "0.4.0", features = ["std"] }
-rand_core = { version = "0.6", features = ["std"] }
-lazy_static = "1.4.0"
-fancy-regex = "0.8.0"
-lettre = { version = "0.10.0-rc.4", features = ["rustls-tls"] }
-secrecy = { version = "0.8.0", features = ["serde"] }
-jsonwebtoken = {version = "8", default-features = false }
-config = { version = "0.12.0", features = ["yaml"]}
-serde-with-expand-env = "1.0.0"
-mockall_double = "0.1.0"
-redis = { version="0.21.5", features=["tokio-native-tls-comp", "tokio-comp", "aio", "connection-manager", "cluster"] }
-auth_macro = { path = "../auth_macro" }
-auth_macro_derive = { path = "../auth_macro_derive" }
+uuid = { version="0.8.2", features = ["serde", "v4"] }
 sha2 = "0.10.2"
-base64ct = "1.4.1"
+
 
 [dependencies.rocket]
 version = "0.5.0-rc.1"
